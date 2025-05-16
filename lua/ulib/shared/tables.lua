@@ -8,13 +8,13 @@
 
 -- cache the metatables of all existing read-only tables,
 -- so our functions can get to them, but user code can't
-local metatable_cache = setmetatable( {}, { __mode = "k" } )
+local metatable_cache = setmetatable({}, { __mode = "k" })
 
-local function make_getter( real_table )
-	local function getter( dummy, key )
-		local ret = real_table[ key ]
-		if type( ret ) == "table" and not metatable_cache[ ret ] then
-			ret = ULib.makeReadOnly( ret )
+local function make_getter(real_table)
+	local function getter(dummy, key)
+		local ret = real_table[key]
+		if type(ret) == "table" and not metatable_cache[ret] then
+			ret = ULib.makeReadOnly(ret)
 		end
 		return ret
 	end
@@ -22,20 +22,20 @@ local function make_getter( real_table )
 end
 
 local function setter()
-	ULib.error( "Attempt to modify read-only table!" )
+	ULib.error("Attempt to modify read-only table!")
 end
 
-local function make_pairs( real_table )
+local function make_pairs(real_table)
 	local function pairs()
 		local key, value, cur_key = nil, nil, nil
 		local function nexter() -- both args dummy
-			key, value = next( real_table, cur_key )
+			key, value = next(real_table, cur_key)
 			cur_key = key
-			if type( key ) == "table" and not metatable_cache[ key ] then
-				key = ULib.makeReadOnly( key )
+			if type(key) == "table" and not metatable_cache[key] then
+				key = ULib.makeReadOnly(key)
 			end
-			if type( value ) == "table" and not metatable_cache[ value ] then
-				value = ULib.makeReadOnly( value )
+			if type(value) == "table" and not metatable_cache[value] then
+				value = ULib.makeReadOnly(value)
 			end
 			return key, value
 		end
@@ -58,19 +58,19 @@ end
 
 		The table read-only'fied
 ]]
-function ULib.makeReadOnly( t )
-	local new={}
-	local mt={
+function ULib.makeReadOnly(t)
+	local new = {}
+	local mt = {
 		__metatable = "read only table",
-		__index = make_getter( t ),
+		__index = make_getter(t),
 		__newindex = setter,
-		__pairs = make_pairs( t ),
-		__type = "read-only table" }
-	setmetatable( new, mt )
-	metatable_cache[ new ] = mt
+		__pairs = make_pairs(t),
+		__type = "read-only table"
+	}
+	setmetatable(new, mt)
+	metatable_cache[new] = mt
 	return new
 end
-
 
 --[[
 	Function: ropairs
@@ -81,14 +81,13 @@ end
 
 		t - The table
 ]]
-function ULib.ropairs( t )
-	local mt = metatable_cache[ t ]
-	if mt==nil then
-		ULib.error( "bad argument #1 to 'ropairs' (read-only table expected, got " .. type(t) .. ")" )
+function ULib.ropairs(t)
+	local mt = metatable_cache[t]
+	if mt == nil then
+		ULib.error("bad argument #1 to 'ropairs' (read-only table expected, got " .. type(t) .. ")")
 	end
 	return mt.__pairs()
 end
-
 
 --[[
 	Function: findInTable
@@ -107,16 +106,16 @@ end
 
 		The number of the key where check resides, false if none is found. If init > last it returns false as well.
 ]]
-function ULib.findInTable( t, check, init, last, recursive )
+function ULib.findInTable(t, check, init, last, recursive)
 	init = init or 1
 	last = last or #t
 
 	if init > last then return false end
 
-	for i=init, last do
-		if t[ i ] == check then return i end
+	for i = init, last do
+		if t[i] == check then return i end
 
-		if type( t[ i ] ) == "table" and recursive then return ULib.findInTable( v, check, 1, recursive ) end
+		if type(t[i]) == "table" and recursive then return ULib.findInTable(v, check, 1, recursive) end
 	end
 
 	return false
@@ -140,21 +139,21 @@ end
 
 		v2.10 - Initial
 ]]
-function ULib.matrixTable( t, columns )
-	local baserows = math.floor( #t / columns )
-	local remainder = math.fmod( #t, columns )
+function ULib.matrixTable(t, columns)
+	local baserows = math.floor(#t / columns)
+	local remainder = math.fmod(#t, columns)
 	local nt = {} -- New table after we process
 	local curn = 1 -- What value to grab next from our old table
 
-	for i=1, columns do
+	for i = 1, columns do
 		local numtograb = baserows
 		if i <= remainder then
 			numtograb = baserows + 1
 		end
 
-		nt[ i ] = {}
-		for n=0, numtograb - 1 do
-			table.insert( nt[ i ], t[ curn + n ] )
+		nt[i] = {}
+		for n = 0, numtograb - 1 do
+			table.insert(nt[i], t[curn + n])
 		end
 		curn = curn + numtograb
 	end

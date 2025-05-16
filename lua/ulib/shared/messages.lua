@@ -21,41 +21,44 @@
 
 		v2.10 - Initial
 ]]
-function ULib.tsay( ply, msg, wait, wasValid )
-	ULib.checkArg( 1, "ULib.tsay", {"nil","Player","Entity"}, ply )
-	ULib.checkArg( 2, "ULib.tsay", "string", msg )
-	ULib.checkArg( 3, "ULib.tsay", {"nil","boolean"}, wait )
+function ULib.tsay(ply, msg, wait, wasValid)
+	ULib.checkArg(1, "ULib.tsay", { "nil", "Player", "Entity" }, ply)
+	ULib.checkArg(2, "ULib.tsay", "string", msg)
+	ULib.checkArg(3, "ULib.tsay", { "nil", "boolean" }, wait)
 
-	if wait then ULib.namedQueueFunctionCall( "ULibChats", ULib.tsay, ply, msg, false, ply and ply:IsValid() ) return end -- Call next frame
+	if wait then
+		ULib.namedQueueFunctionCall("ULibChats", ULib.tsay, ply, msg, false, ply and ply:IsValid())
+		return
+	end                                                                                                                -- Call next frame
 
-	if SERVER and ply and not ply:IsValid() then -- Server console
-		if wasValid then -- This means we had a valid player that left, so do nothing
+	if SERVER and ply and not ply:IsValid() then                                                                       -- Server console
+		if wasValid then                                                                                               -- This means we had a valid player that left, so do nothing
 			return
 		end
-		Msg( msg .. "\n" )
+		Msg(msg .. "\n")
 		return
 	end
 
 	if CLIENT then
-		LocalPlayer():ChatPrint( msg )
+		LocalPlayer():ChatPrint(msg)
 		return
 	end
 
 	if ply then
-		ply:ChatPrint( msg )
+		ply:ChatPrint(msg)
 	else
 		local players = player.GetAll()
-		for _, player in ipairs( players ) do
-			player:ChatPrint( msg )
+		for _, player in ipairs(players) do
+			player:ChatPrint(msg)
 		end
 	end
 end
 
 local serverConsole = {} -- Used in the function below to identify the server console (internal use)
 
-local function tsayColorCallback( ply, ... )
+local function tsayColorCallback(ply, ...)
 	if CLIENT then
-		chat.AddText( ... )
+		chat.AddText(...)
 		return
 	end
 
@@ -64,10 +67,10 @@ local function tsayColorCallback( ply, ... )
 	local args = { ... }
 
 	if ply == serverConsole then
-		for i=2, #args, 2 do
-			Msg( args[ i ] )
+		for i = 2, #args, 2 do
+			Msg(args[i])
 		end
-		Msg( "\n" );
+		Msg("\n");
 		return
 	end
 
@@ -75,78 +78,73 @@ local function tsayColorCallback( ply, ... )
 	local chunks = { current_chunk }
 	local max_chunk_size = 240
 	while #args > 0 do
-		local arg = table.remove( args, 1 )
-		local typ = type( arg )
-		local arg_size = typ == "table" and 4 or #arg + 2 -- Include null in strings, bool in both
+		local arg = table.remove(args, 1)
+		local typ = type(arg)
+		local arg_size = typ == "table" and 4 or #arg + 2                    -- Include null in strings, bool in both
 		if typ == "string" and current_chunk.size + arg_size > max_chunk_size then -- Split a large string up into multiple messages
-			local substr = arg:sub( 1, math.max( 1, max_chunk_size - current_chunk.size - 2 ) )
+			local substr = arg:sub(1, math.max(1, max_chunk_size - current_chunk.size - 2))
 			if #substr > 0 then
-				table.insert( current_chunk, substr )
+				table.insert(current_chunk, substr)
 			end
-			table.insert( args, 1, arg:sub( #substr + 1) )
+			table.insert(args, 1, arg:sub(#substr + 1))
 
 			current_chunk = { size = 0 }
-			table.insert( chunks, current_chunk )
+			table.insert(chunks, current_chunk)
 		else
 			if current_chunk.size + arg_size > max_chunk_size then
 				current_chunk = { size = 0 }
-				table.insert( chunks, current_chunk )
+				table.insert(chunks, current_chunk)
 			end
 			current_chunk.size = current_chunk.size + arg_size
-			table.insert( current_chunk, arg )
+			table.insert(current_chunk, arg)
 		end
 	end
 
-	for chunk_num=1, #chunks do
-		local chunk = chunks[ chunk_num ]
-		
+	for chunk_num = 1, #chunks do
+		local chunk = chunks[chunk_num]
+
 		net.Start("tsayc")
-			net.WriteBool(chunk_num == #chunks)
-			net.WriteInt( #chunk, 8 )
-			for i=1, #chunk do
-				local arg = chunk[ i ]
-				if type( arg ) == "string" then
-					net.WriteBool( true )
-					net.WriteString( arg )
-				else
-					net.WriteBool( false )
-					net.WriteColor( arg )
-				end
+		net.WriteBool(chunk_num == #chunks)
+		net.WriteInt(#chunk, 8)
+		for i = 1, #chunk do
+			local arg = chunk[i]
+			if type(arg) == "string" then
+				net.WriteBool(true)
+				net.WriteString(arg)
+			else
+				net.WriteBool(false)
+				net.WriteColor(arg)
 			end
-		
-		
+		end
+
+
 		if IsValid(ply) then
 			net.Send(ply)
 		else
 			net.Broadcast()
 		end
-
 	end
 end
 
 if CLIENT then
-
 	local accumulator = {}
 
-	net.Receive( "tsayc", function( len )
-
+	net.Receive("tsayc", function(len)
 		local last = net.ReadBool()
 		local argn = net.ReadInt(8)
-		for i=1, argn do
+		for i = 1, argn do
 			if net.ReadBool() then
-				table.insert( accumulator, net.ReadString() )
+				table.insert(accumulator, net.ReadString())
 			else
-				table.insert( accumulator, net.ReadColor() )
+				table.insert(accumulator, net.ReadColor())
 			end
 		end
-		
+
 		if last then
-			chat.AddText( unpack( accumulator ) )
+			chat.AddText(unpack(accumulator))
 			accumulator = {}
 		end
-
-	end )
-
+	end)
 end
 
 
@@ -165,13 +163,15 @@ end
 
 		v2.40 - Initial.
 ]]
-function ULib.tsayColor( ply, wait, ... )
-	if SERVER and ply and not ply:IsValid() then ply = serverConsole end -- Mark as server
+function ULib.tsayColor(ply, wait, ...)
+	if SERVER and ply and not ply:IsValid() then ply = serverConsole end                         -- Mark as server
 
-	if wait then ULib.namedQueueFunctionCall( "ULibChats", tsayColorCallback, ply, ... ) return end -- Call next frame
-	tsayColorCallback( ply, ... )
+	if wait then
+		ULib.namedQueueFunctionCall("ULibChats", tsayColorCallback, ply, ...)
+		return
+	end                                                                                          -- Call next frame
+	tsayColorCallback(ply, ...)
 end
-
 
 --[[
 	Function: tsayError
@@ -188,10 +188,9 @@ end
 
 		v2.40 - Initial.
 ]]
-function ULib.tsayError( ply, msg, wait )
-	return ULib.tsayColor( ply, wait, Color( 255, 140, 39 ), msg )
+function ULib.tsayError(ply, msg, wait)
+	return ULib.tsayColor(ply, wait, Color(255, 140, 39), msg)
 end
-
 
 --[[
 	Function: csay
@@ -211,17 +210,16 @@ end
 		v2.10 - Added fade parameter. Fixed it sending the message multiple times.
 		v2.40 - Changed to use clientRPC.
 ]]
-function ULib.csay( ply, msg, color, duration, fade )
+function ULib.csay(ply, msg, color, duration, fade)
 	if CLIENT then
-		ULib.csayDraw( msg, color, duration, fade )
-		Msg( msg .. "\n" )
+		ULib.csayDraw(msg, color, duration, fade)
+		Msg(msg .. "\n")
 		return
 	end
 
-	ULib.clientRPC( ply, "ULib.csayDraw", msg, color, duration, fade )
-	ULib.console( ply, msg )
+	ULib.clientRPC(ply, "ULib.csayDraw", msg, color, duration, fade)
+	ULib.console(ply, msg)
 end
-
 
 --[[
 	Function: console
@@ -233,22 +231,21 @@ end
 		ply - The player to print to, set to nil to send to everyone. (Ignores this param if called on client)
 		msg - The message to print.
 ]]
-function ULib.console( ply, msg )
+function ULib.console(ply, msg)
 	if CLIENT or (ply and not ply:IsValid()) then
-		Msg( msg .. "\n" )
+		Msg(msg .. "\n")
 		return
 	end
 
 	if ply then
-		ply:PrintMessage( HUD_PRINTCONSOLE, msg .. "\n" )
+		ply:PrintMessage(HUD_PRINTCONSOLE, msg .. "\n")
 	else
 		local players = player.GetAll()
-		for _, player in ipairs( players ) do
-			player:PrintMessage( HUD_PRINTCONSOLE, msg .. "\n" )
+		for _, player in ipairs(players) do
+			player:PrintMessage(HUD_PRINTCONSOLE, msg .. "\n")
 		end
 	end
 end
-
 
 --[[
 	Function: error
@@ -259,14 +256,13 @@ end
 
 		s - The string to use as the error message
 ]]
-function ULib.error( s )
+function ULib.error(s)
 	if CLIENT then
-		Msg( "[LC ULIB ERROR] " .. s .. "\n" )
+		Msg("[LC ULIB ERROR] " .. s .. "\n")
 	else
-		Msg( "[LS ULIB ERROR] " .. s .. "\n" )
+		Msg("[LS ULIB ERROR] " .. s .. "\n")
 	end
 end
-
 
 --[[
 	Function: debugFunctionCall
@@ -283,12 +279,12 @@ end
 		v2.40 - Now uses print instead of Msg, since Msg seems to have a low max length.
 			Changed how the variable length params work so you can pass nil followed by more params
 ]]
-function ULib.debugFunctionCall( name, ... )
+function ULib.debugFunctionCall(name, ...)
 	local args = { ... }
 
-	print( "Function '" .. name .. "' called. Parameters:" )
-	for i=1, #args do
-		local value = ULib.serialize( args[ i ] )
-		print( "[PARAMETER " .. i .. "]: Type=" .. type( args[ i ] ) .. "\tValue=(" .. value .. ")" )
+	print("Function '" .. name .. "' called. Parameters:")
+	for i = 1, #args do
+		local value = ULib.serialize(args[i])
+		print("[PARAMETER " .. i .. "]: Type=" .. type(args[i]) .. "\tValue=(" .. value .. ")")
 	end
 end

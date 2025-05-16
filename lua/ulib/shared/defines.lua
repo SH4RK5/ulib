@@ -17,7 +17,7 @@ ULib.ACCESS_SUPERADMIN = "superadmin"
 
 ULib.DEFAULT_ACCESS = ULib.ACCESS_ALL
 
-ULib.DEFAULT_TSAY_COLOR = Color( 151, 211, 255 ) -- Found by using MS Paint
+ULib.DEFAULT_TSAY_COLOR = Color(151, 211, 255)   -- Found by using MS Paint
 
 
 --[[
@@ -154,7 +154,8 @@ ULib.HOOK_PLAYER_TARGET = "ULibPlayerTarget"
 
 		v2.40 - Initial
 ]]
-ULib.HOOK_PLAYER_TARGETS = "ULibPlayerTargets" -- Exactly the same as the above but used when the player is using a command that can target multiple players.
+ULib.HOOK_PLAYER_TARGETS =
+"ULibPlayerTargets"                            -- Exactly the same as the above but used when the player is using a command that can target multiple players.
 
 --[[
 	Hook: ULibPostTranslatedCommand
@@ -449,12 +450,12 @@ ULib.HOOK_USER_REMOVED = "ULibUserRemoved"
 	These defines are server-only, to help with UCL.
 ]]
 if SERVER then
-ULib.UCL_LOAD_DEFAULT = true -- Set this to false to ignore the SetUserGroup() call.
-ULib.UCL_USERS = "data/ulib/users.txt"
-ULib.UCL_GROUPS = "data/ulib/groups.txt"
-ULib.UCL_REGISTERED = "data/ulib/misc_registered.txt" -- Holds access strings that ULib has already registered
+	ULib.UCL_LOAD_DEFAULT = true -- Set this to false to ignore the SetUserGroup() call.
+	ULib.UCL_USERS = "data/ulib/users.txt"
+	ULib.UCL_GROUPS = "data/ulib/groups.txt"
+	ULib.UCL_REGISTERED = "data/ulib/misc_registered.txt" -- Holds access strings that ULib has already registered
 
-ULib.DEFAULT_GRANT_ACCESS = { allow={}, deny={}, guest=true }
+	ULib.DEFAULT_GRANT_ACCESS = { allow = {}, deny = {}, guest = true }
 end
 
 --[[
@@ -463,8 +464,8 @@ end
 	These defines are server-only, to help with the networking library.
 ]]
 if SERVER then
-	util.AddNetworkString( "URPC" )
-	util.AddNetworkString( "tsayc" )
-	util.AddNetworkString( "ulib_repWriteCvar" )
-	util.AddNetworkString( "ulib_repChangeCvar" )
+	util.AddNetworkString("URPC")
+	util.AddNetworkString("tsayc")
+	util.AddNetworkString("ulib_repWriteCvar")
+	util.AddNetworkString("ulib_repChangeCvar")
 end

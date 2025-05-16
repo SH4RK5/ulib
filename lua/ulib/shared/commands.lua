@@ -68,7 +68,7 @@ cmds.allowTimeString = cmds.allowTimeString or {} -- Key
 
 		2.40 - Initial
 ]]
-cmds.BaseArg = inheritsFrom( nil )
+cmds.BaseArg = inheritsFrom(nil)
 
 
 --[[
@@ -90,10 +90,9 @@ cmds.BaseArg = inheritsFrom( nil )
 		The parsed arg correctly typed if it validated, false and an
 		explanation otherwise.
 ]]
-function cmds.BaseArg:parseAndValidate( ply, arg, cmdInfo, plyRestrictions )
-	error( "Unimplemented BaseArg:parseAndValidate called" )
+function cmds.BaseArg:parseAndValidate(ply, arg, cmdInfo, plyRestrictions)
+	error("Unimplemented BaseArg:parseAndValidate called")
 end
-
 
 --[[
 	Function: cmds.BaseArg:complete
@@ -111,10 +110,9 @@ end
 
 		A table of strings containing the options that are available.
 ]]
-function cmds.BaseArg:complete( arg, cmdInfo, plyRestrictions )
-	error( "Unimplemented BaseArg:complete called" )
+function cmds.BaseArg:complete(arg, cmdInfo, plyRestrictions)
+	error("Unimplemented BaseArg:complete called")
 end
-
 
 --[[
 	Function: cmds.BaseArg:usage
@@ -130,10 +128,9 @@ end
 
 		A string describing what this parameter is and how to use it.
 ]]
-function cmds.BaseArg:usage( cmdInfo, plyRestrictions )
-	error( "Unimplemented BaseArg:usage called" )
+function cmds.BaseArg:usage(cmdInfo, plyRestrictions)
+	error("Unimplemented BaseArg:usage called")
 end
-
 
 --[[
 	Class: cmds.NumArg
@@ -158,7 +155,7 @@ end
 
 		2.40 - Initial
 ]]
-cmds.NumArg = inheritsFrom( cmds.BaseArg )
+cmds.NumArg = inheritsFrom(cmds.BaseArg)
 
 
 --[[
@@ -166,36 +163,37 @@ cmds.NumArg = inheritsFrom( cmds.BaseArg )
 
 	A helper function to help us figure out restrictions on this command.
 ]]
-function cmds.NumArg:processRestrictions( cmdRestrictions, plyRestrictions )
+function cmds.NumArg:processRestrictions(cmdRestrictions, plyRestrictions)
 	-- First, reset
 	self.min = nil
 	self.max = nil
 
-	local allowTimeString = table.HasValue( cmdRestrictions, cmds.allowTimeString )
+	local allowTimeString = table.HasValue(cmdRestrictions, cmds.allowTimeString)
 
-	if plyRestrictions then -- Access tag restriction
-		if not plyRestrictions:find( ":" ) then -- Assume they only want one number here
+	if plyRestrictions then               -- Access tag restriction
+		if not plyRestrictions:find(":") then -- Assume they only want one number here
 			self.min = plyRestrictions
 			self.max = plyRestrictions
 		else
 			local timeStringMatcher = "[-hdwy%d]*"
-			dummy, dummy, self.min, self.max = plyRestrictions:find( "^(" .. timeStringMatcher .. "):(" .. timeStringMatcher .. ")$" )
+			dummy, dummy, self.min, self.max = plyRestrictions:find("^(" ..
+			timeStringMatcher .. "):(" .. timeStringMatcher .. ")$")
 		end
 
 		if not allowTimeString then
-			self.min = tonumber( self.min )
-			self.max = tonumber( self.max )
+			self.min = tonumber(self.min)
+			self.max = tonumber(self.max)
 		else
-			self.min = ULib.stringTimeToMinutes( self.min )
-			self.max = ULib.stringTimeToMinutes( self.max )
+			self.min = ULib.stringTimeToMinutes(self.min)
+			self.max = ULib.stringTimeToMinutes(self.max)
 		end
 	end
 
 	if allowTimeString and not self.timeStringsParsed then
 		self.timeStringsParsed = true
-		cmdRestrictions.min = ULib.stringTimeToMinutes( cmdRestrictions.min )
-		cmdRestrictions.max = ULib.stringTimeToMinutes( cmdRestrictions.max )
-		cmdRestrictions.default = ULib.stringTimeToMinutes( cmdRestrictions.default )
+		cmdRestrictions.min = ULib.stringTimeToMinutes(cmdRestrictions.min)
+		cmdRestrictions.max = ULib.stringTimeToMinutes(cmdRestrictions.max)
+		cmdRestrictions.default = ULib.stringTimeToMinutes(cmdRestrictions.default)
 	end
 
 	if cmdRestrictions.min and (not self.min or self.min < cmdRestrictions.min) then
@@ -207,29 +205,28 @@ function cmds.NumArg:processRestrictions( cmdRestrictions, plyRestrictions )
 	end
 end
 
-
 --[[
 	Function: cmds.NumArg:parseAndValidate
 
 	See <cmds.BaseArg:parseAndValidate>
 ]]
-function cmds.NumArg:parseAndValidate( ply, arg, cmdInfo, plyRestrictions )
-	self:processRestrictions( cmdInfo, plyRestrictions )
+function cmds.NumArg:parseAndValidate(ply, arg, cmdInfo, plyRestrictions)
+	self:processRestrictions(cmdInfo, plyRestrictions)
 
 	if not arg and self.min and self.min == self.max then -- Arg's not valid, min is, and it's equal to max
 		return self.min
 	end
 
-	if not arg and table.HasValue( cmdInfo, cmds.optional ) then
+	if not arg and table.HasValue(cmdInfo, cmds.optional) then
 		arg = cmdInfo.default or 0 -- Set it, needs to go through our process
 	end
 
-	local allowTimeString = table.HasValue( cmdInfo, cmds.allowTimeString )
+	local allowTimeString = table.HasValue(cmdInfo, cmds.allowTimeString)
 	local num -- We check if it's nil after we see if a default has been provided for them
 	if not allowTimeString then
-		num = tonumber( arg )
+		num = tonumber(arg)
 	else
-		num = ULib.stringTimeToMinutes( arg )
+		num = ULib.stringTimeToMinutes(arg)
 	end
 
 	local typeString
@@ -240,42 +237,44 @@ function cmds.NumArg:parseAndValidate( ply, arg, cmdInfo, plyRestrictions )
 	end
 
 	if not num then
-		return nil, string.format( "invalid " .. typeString .. " \"%s\" specified", tostring( arg ) )
+		return nil, string.format("invalid " .. typeString .. " \"%s\" specified", tostring(arg))
 	end
 
 	if self.min and num < self.min then
-		return nil, string.format( "specified " .. typeString .. " (%s) was below your allowed minimum value of %g", arg, self.min )
+		return nil,
+			string.format("specified " .. typeString .. " (%s) was below your allowed minimum value of %g", arg, self
+			.min)
 	end
 
 	if self.max and num > self.max then
-		return nil, string.format( "specified " .. typeString .. " (%s) was above your allowed maximum value of %g", arg, self.max )
+		return nil,
+			string.format("specified " .. typeString .. " (%s) was above your allowed maximum value of %g", arg, self
+			.max)
 	end
 
-	if table.HasValue( cmdInfo, cmds.round ) then
-		return math.Round( num )
+	if table.HasValue(cmdInfo, cmds.round) then
+		return math.Round(num)
 	end
 	return num
 end
-
 
 --[[
 	Function: cmds.NumArg:complete
 
 	See <cmds.BaseArg:complete>
 ]]
-function cmds.NumArg:complete( ply, arg, cmdInfo, plyRestrictions )
-	return { self:usage( cmdInfo, plyRestrictions ) }
+function cmds.NumArg:complete(ply, arg, cmdInfo, plyRestrictions)
+	return { self:usage(cmdInfo, plyRestrictions) }
 end
-
 
 --[[
 	Function: cmds.NumArg:usage
 
 	See <cmds.BaseArg:usage>
 ]]
-function cmds.NumArg:usage( cmdInfo, plyRestrictions )
-	self:processRestrictions( cmdInfo, plyRestrictions )
-	local isOptional = table.HasValue( cmdInfo, cmds.optional )
+function cmds.NumArg:usage(cmdInfo, plyRestrictions)
+	self:processRestrictions(cmdInfo, plyRestrictions)
+	local isOptional = table.HasValue(cmdInfo, cmds.optional)
 
 	local str = cmdInfo.hint or "number"
 
@@ -297,7 +296,7 @@ function cmds.NumArg:usage( cmdInfo, plyRestrictions )
 		end
 		if cmdInfo.default or isOptional then
 			if self.min or self.max then
-					str = str .. ", "
+				str = str .. ", "
 			end
 			str = str .. "default " .. (cmdInfo.default or 0)
 		end
@@ -309,7 +308,6 @@ function cmds.NumArg:usage( cmdInfo, plyRestrictions )
 		return str
 	end
 end
-
 
 --[[
 	Class: cmds.BoolArg
@@ -331,7 +329,7 @@ end
 
 		2.40 - Initial
 ]]
-cmds.BoolArg = inheritsFrom( cmds.BaseArg )
+cmds.BoolArg = inheritsFrom(cmds.BaseArg)
 
 
 --[[
@@ -339,70 +337,67 @@ cmds.BoolArg = inheritsFrom( cmds.BaseArg )
 
 	A helper function to help us figure out restrictions on this command.
 ]]
-function cmds.BoolArg:processRestrictions( cmdRestrictions, plyRestrictions )
+function cmds.BoolArg:processRestrictions(cmdRestrictions, plyRestrictions)
 	-- First, reset
 	self.restrictedTo = nil
 
 	if plyRestrictions and plyRestrictions ~= "*" then -- Access tag restriction
-		self.restrictedTo = ULib.toBool( plyRestrictions )
+		self.restrictedTo = ULib.toBool(plyRestrictions)
 	end
 
 	-- There'd be no point in having command-level restrictions on this, so nothing is implemented for it.
 end
-
 
 --[[
 	Function: cmds.BoolArg:parseAndValidate
 
 	See <cmds.BaseArg:parseAndValidate>
 ]]
-function cmds.BoolArg:parseAndValidate( ply, arg, cmdInfo, plyRestrictions )
-	self:processRestrictions( cmdInfo, plyRestrictions )
+function cmds.BoolArg:parseAndValidate(ply, arg, cmdInfo, plyRestrictions)
+	self:processRestrictions(cmdInfo, plyRestrictions)
 
-	if not arg and table.HasValue( cmdInfo, cmds.optional ) then
+	if not arg and table.HasValue(cmdInfo, cmds.optional) then
 		-- Yah, I know this following statement could be 'false or false', but it's still false.
 		arg = cmdInfo.default or false -- Set it, needs to go through our process
 	end
 
-	local desired = ULib.toBool( arg )
+	local desired = ULib.toBool(arg)
 
 	if self.restrictedTo ~= nil and desired ~= self.restrictedTo then
-		return nil, "you are not allowed to specify " .. tostring( desired ) .. " here"
+		return nil, "you are not allowed to specify " .. tostring(desired) .. " here"
 	end
 
 	return desired
 end
-
 
 --[[
 	Function: cmds.BoolArg:complete
 
 	See <cmds.BaseArg:complete>
 ]]
-function cmds.BoolArg:complete( ply, arg, cmdInfo, plyRestrictions )
-	self:processRestrictions( cmdInfo, plyRestrictions )
-	local ret = { self:usage( cmdInfo, plyRestrictions ) }
+function cmds.BoolArg:complete(ply, arg, cmdInfo, plyRestrictions)
+	self:processRestrictions(cmdInfo, plyRestrictions)
+	local ret = { self:usage(cmdInfo, plyRestrictions) }
 
 	if not self.restrictedTo then
-		table.insert( ret, "0" )
+		table.insert(ret, "0")
 	end
 
 	if self.restrictedTo ~= false then
-		table.insert( ret, "1" )
+		table.insert(ret, "1")
 	end
 
 	return ret
 end
-
 
 --[[
 	Function: cmds.BoolArg:usage
 
 	See <cmds.BaseArg:usage>
 ]]
-function cmds.BoolArg:usage( cmdInfo, plyRestrictions )
-	self:processRestrictions( cmdInfo, plyRestrictions )
-	local isOptional = table.HasValue( cmdInfo, cmds.optional )
+function cmds.BoolArg:usage(cmdInfo, plyRestrictions)
+	self:processRestrictions(cmdInfo, plyRestrictions)
+	local isOptional = table.HasValue(cmdInfo, cmds.optional)
 
 	local str = "<"
 	if cmdInfo.hint then
@@ -421,7 +416,6 @@ function cmds.BoolArg:usage( cmdInfo, plyRestrictions )
 
 	return str
 end
-
 
 --[[
 	Class: cmds.PlayerArg
@@ -444,7 +438,7 @@ end
 
 		2.40 - Initial
 ]]
-cmds.PlayerArg = inheritsFrom( cmds.BaseArg )
+cmds.PlayerArg = inheritsFrom(cmds.BaseArg)
 
 
 --[[
@@ -452,30 +446,29 @@ cmds.PlayerArg = inheritsFrom( cmds.BaseArg )
 
 	A helper function to help us figure out restrictions on this command.
 ]]
-function cmds.PlayerArg:processRestrictions( ply, cmdRestrictions, plyRestrictions )
-	self.restrictedTargets = nil -- Reset
+function cmds.PlayerArg:processRestrictions(ply, cmdRestrictions, plyRestrictions)
+	self.restrictedTargets = nil        -- Reset
 	cmds.PlayerArg.restrictedTargets = nil -- Because of inheritance, make sure this is reset too
 	local ignore_can_target = false
-	if plyRestrictions and plyRestrictions:sub( 1, 1 ) == "$" then
-		plyRestrictions = plyRestrictions:sub( 2 )
+	if plyRestrictions and plyRestrictions:sub(1, 1) == "$" then
+		plyRestrictions = plyRestrictions:sub(2)
 		ignore_can_target = true
 	end
 
 	if cmdRestrictions.target then
 		-- Realize it can be false after this, meaning they can target no-one connected.
-		self.restrictedTargets = ULib.getUsers( cmdRestrictions.target, true, ply )
+		self.restrictedTargets = ULib.getUsers(cmdRestrictions.target, true, ply)
 	end
 
-	if plyRestrictions and plyRestrictions ~= "" then -- Access tag restriction
-		local restricted = ULib.getUsers( plyRestrictions, true, ply )
+	if plyRestrictions and plyRestrictions ~= "" then  -- Access tag restriction
+		local restricted = ULib.getUsers(plyRestrictions, true, ply)
 		if not restricted or not self.restrictedTargets then -- Easy, just set it
 			self.restrictedTargets = restricted
-
 		else -- Make a subset! We want to remove any values from self.restrictedTargets that aren't in restricted
 			local i = 1
-			while self.restrictedTargets[ i ] do
-				if not table.HasValue( restricted, self.restrictedTargets[ i ] ) then
-					table.remove( self.restrictedTargets, i )
+			while self.restrictedTargets[i] do
+				if not table.HasValue(restricted, self.restrictedTargets[i]) then
+					table.remove(self.restrictedTargets, i)
 				else
 					i = i + 1
 				end
@@ -483,17 +476,16 @@ function cmds.PlayerArg:processRestrictions( ply, cmdRestrictions, plyRestrictio
 		end
 	end
 
-	if ply:IsValid() and not ignore_can_target and not table.HasValue( cmdRestrictions, cmds.ignoreCanTarget ) and ULib.ucl.getGroupCanTarget( ply:GetUserGroup() ) then -- can_target restriction
-		local selfTarget = "$" .. ULib.getUniqueIDForPlayer( ply )
-		local restricted = ULib.getUsers( ULib.ucl.getGroupCanTarget( ply:GetUserGroup() ) .. "," .. selfTarget, true, ply ) -- Allow self on top of restrictions
-		if not restricted or not self.restrictedTargets then -- Easy, just set it
+	if ply:IsValid() and not ignore_can_target and not table.HasValue(cmdRestrictions, cmds.ignoreCanTarget) and ULib.ucl.getGroupCanTarget(ply:GetUserGroup()) then  -- can_target restriction
+		local selfTarget = "$" .. ULib.getUniqueIDForPlayer(ply)
+		local restricted = ULib.getUsers(ULib.ucl.getGroupCanTarget(ply:GetUserGroup()) .. "," .. selfTarget, true, ply)                                              -- Allow self on top of restrictions
+		if not restricted or not self.restrictedTargets then                                                                                                          -- Easy, just set it
 			self.restrictedTargets = restricted
-
 		else -- Make a subset! We want to remove any values from self.restrictedTargets that aren't in restricted
 			local i = 1
-			while self.restrictedTargets[ i ] do
-				if not table.HasValue( restricted, self.restrictedTargets[ i ] ) then
-					table.remove( self.restrictedTargets, i )
+			while self.restrictedTargets[i] do
+				if not table.HasValue(restricted, self.restrictedTargets[i]) then
+					table.remove(self.restrictedTargets, i)
 				else
 					i = i + 1
 				end
@@ -502,36 +494,35 @@ function cmds.PlayerArg:processRestrictions( ply, cmdRestrictions, plyRestrictio
 	end
 end
 
-
 --[[
 	Function: cmds.PlayerArg:parseAndValidate
 
 	See <cmds.BaseArg:parseAndValidate>
 ]]
-function cmds.PlayerArg:parseAndValidate( ply, arg, cmdInfo, plyRestrictions )
-	self:processRestrictions( ply, cmdInfo, plyRestrictions )
+function cmds.PlayerArg:parseAndValidate(ply, arg, cmdInfo, plyRestrictions)
+	self:processRestrictions(ply, cmdInfo, plyRestrictions)
 
-	if not arg and table.HasValue( cmdInfo, cmds.optional ) then
+	if not arg and table.HasValue(cmdInfo, cmds.optional) then
 		if not cmdInfo.default and not ply:IsValid() then
 			return nil, "target must be specified"
 		end
 
-		arg = cmdInfo.default or "$" .. ULib.getUniqueIDForPlayer( ply ) -- Set it, needs to go through our process
+		arg = cmdInfo.default or "$" .. ULib.getUniqueIDForPlayer(ply) -- Set it, needs to go through our process
 	end
 
-	local target, err_msg1 = ULib.getUser( arg, true, ply )
+	local target, err_msg1 = ULib.getUser(arg, true, ply)
 
-	local return_value, err_msg2 = hook.Call( ULib.HOOK_PLAYER_TARGET, _, ply, cmdInfo.cmd, target )
+	local return_value, err_msg2 = hook.Call(ULib.HOOK_PLAYER_TARGET, _, ply, cmdInfo.cmd, target)
 	if return_value == false then
 		return nil, err_msg2 or "you cannot target this person"
-	elseif type( return_value ) == "Player" then
+	elseif type(return_value) == "Player" then
 		target = return_value
 	end
 
 	if return_value ~= true then -- Go through our "normal" restriction process
 		if not target then return nil, err_msg1 or "no target found" end
 
-		if self.restrictedTargets == false or (self.restrictedTargets and not table.HasValue( self.restrictedTargets, target )) then
+		if self.restrictedTargets == false or (self.restrictedTargets and not table.HasValue(self.restrictedTargets, target)) then
 			return nil, "you cannot target this person"
 		end
 	end
@@ -539,14 +530,13 @@ function cmds.PlayerArg:parseAndValidate( ply, arg, cmdInfo, plyRestrictions )
 	return target
 end
 
-
 --[[
 	Function: cmds.PlayerArg:complete
 
 	See <cmds.BaseArg:complete>
 ]]
-function cmds.PlayerArg:complete( ply, arg, cmdInfo, plyRestrictions )
-	self:processRestrictions( ply, cmdInfo, plyRestrictions )
+function cmds.PlayerArg:complete(ply, arg, cmdInfo, plyRestrictions)
+	self:processRestrictions(ply, cmdInfo, plyRestrictions)
 
 	local targets
 	if self.restrictedTargets == false then -- No one allowed
@@ -554,15 +544,15 @@ function cmds.PlayerArg:complete( ply, arg, cmdInfo, plyRestrictions )
 	elseif arg == "" then
 		targets = player.GetAll()
 	else
-		targets = ULib.getUsers( arg, true, ply )
+		targets = ULib.getUsers(arg, true, ply)
 		if not targets then targets = {} end -- No one found
 	end
 
 	if self.restrictedTargets then
 		local i = 1
-		while targets[ i ] do
-			if not table.HasValue( self.restrictedTargets, targets[ i ] ) then
-				table.remove( targets, i )
+		while targets[i] do
+			if not table.HasValue(self.restrictedTargets, targets[i]) then
+				table.remove(targets, i)
 			else
 				i = i + 1
 			end
@@ -570,27 +560,26 @@ function cmds.PlayerArg:complete( ply, arg, cmdInfo, plyRestrictions )
 	end
 
 	local names = {}
-	for _, ply in ipairs( targets ) do
-		table.insert( names, string.format( '"%s"', ply:Nick() ) )
+	for _, ply in ipairs(targets) do
+		table.insert(names, string.format('"%s"', ply:Nick()))
 	end
-	table.sort( names )
+	table.sort(names)
 
 	if #names == 0 then
-		return { self:usage( cmdInfo, plyRestrictions ) }
+		return { self:usage(cmdInfo, plyRestrictions) }
 	end
 
 	return names
 end
-
 
 --[[
 	Function: cmds.PlayerArg:usage
 
 	See <cmds.BaseArg:usage>
 ]]
-function cmds.PlayerArg:usage( cmdInfo, plyRestrictions )
+function cmds.PlayerArg:usage(cmdInfo, plyRestrictions)
 	-- self:processRestrictions( cmdInfo, plyRestrictions )
-	local isOptional = table.HasValue( cmdInfo, cmds.optional )
+	local isOptional = table.HasValue(cmdInfo, cmds.optional)
 
 	if isOptional then
 		if not cmdInfo.default or cmdInfo.default == "^" then
@@ -601,7 +590,6 @@ function cmds.PlayerArg:usage( cmdInfo, plyRestrictions )
 	end
 	return "<player>"
 end
-
 
 --[[
 	Class: cmds.PlayersArg
@@ -615,7 +603,7 @@ end
 
 		2.40 - Initial
 ]]
-cmds.PlayersArg = inheritsFrom( cmds.PlayerArg )
+cmds.PlayersArg = inheritsFrom(cmds.PlayerArg)
 
 
 --[[
@@ -623,23 +611,23 @@ cmds.PlayersArg = inheritsFrom( cmds.PlayerArg )
 
 	See <cmds.PlayerArg:parseAndValidate>
 ]]
-function cmds.PlayersArg:parseAndValidate( ply, arg, cmdInfo, plyRestrictions )
-	self:processRestrictions( ply, cmdInfo, plyRestrictions )
+function cmds.PlayersArg:parseAndValidate(ply, arg, cmdInfo, plyRestrictions)
+	self:processRestrictions(ply, cmdInfo, plyRestrictions)
 
-	if not arg and table.HasValue( cmdInfo, cmds.optional ) then
+	if not arg and table.HasValue(cmdInfo, cmds.optional) then
 		if not cmdInfo.default and not ply:IsValid() then
 			return nil, "target must be specified"
 		end
 
-		arg = cmdInfo.default or "$" .. ULib.getUniqueIDForPlayer( ply ) -- Set it, needs to go through our process
+		arg = cmdInfo.default or "$" .. ULib.getUniqueIDForPlayer(ply) -- Set it, needs to go through our process
 	end
 
-	local targets = ULib.getUsers( arg, true, ply )
+	local targets = ULib.getUsers(arg, true, ply)
 
-	local return_value, err_msg = hook.Call( ULib.HOOK_PLAYER_TARGETS, _, ply, cmdInfo.cmd, targets )
+	local return_value, err_msg = hook.Call(ULib.HOOK_PLAYER_TARGETS, _, ply, cmdInfo.cmd, targets)
 	if return_value == false then
 		return nil, err_msg or "you cannot target this person or these persons"
-	elseif type( return_value ) == "table" then
+	elseif type(return_value) == "table" then
 		if #return_value == 0 then
 			return nil, err_msg or "you cannot target this person or these persons"
 		else
@@ -652,9 +640,9 @@ function cmds.PlayersArg:parseAndValidate( ply, arg, cmdInfo, plyRestrictions )
 
 		if self.restrictedTargets then
 			local i = 1
-			while targets[ i ] do
-				if not table.HasValue( self.restrictedTargets, targets[ i ] ) then
-					table.remove( targets, i )
+			while targets[i] do
+				if not table.HasValue(self.restrictedTargets, targets[i]) then
+					table.remove(targets, i)
 				else
 					i = i + 1
 				end
@@ -669,15 +657,14 @@ function cmds.PlayersArg:parseAndValidate( ply, arg, cmdInfo, plyRestrictions )
 	return targets
 end
 
-
 --[[
 	Function: cmds.PlayersArg:usage
 
 	See <cmds.PlayerArg:usage>
 ]]
-function cmds.PlayersArg:usage( cmdInfo, plyRestrictions )
+function cmds.PlayersArg:usage(cmdInfo, plyRestrictions)
 	-- self:processRestrictions( cmdInfo, plyRestrictions )
-	local isOptional = table.HasValue( cmdInfo, cmds.optional )
+	local isOptional = table.HasValue(cmdInfo, cmds.optional)
 
 	if isOptional then
 		if not cmdInfo.default or cmdInfo.default == "^" then
@@ -689,7 +676,6 @@ function cmds.PlayersArg:usage( cmdInfo, plyRestrictions )
 	return "<players>"
 end
 
-
 --[[
 	Class: cmds.CallingPlayerArg
 
@@ -699,7 +685,7 @@ end
 
 		2.40 - Initial
 ]]
-cmds.CallingPlayerArg = inheritsFrom( cmds.BaseArg )
+cmds.CallingPlayerArg = inheritsFrom(cmds.BaseArg)
 cmds.CallingPlayerArg.invisible = true -- Not actually specified
 
 
@@ -708,10 +694,9 @@ cmds.CallingPlayerArg.invisible = true -- Not actually specified
 
 	See <cmds.BaseArg:parseAndValidate>
 ]]
-function cmds.CallingPlayerArg:parseAndValidate( ply, arg, cmdInfo, plyRestrictions )
+function cmds.CallingPlayerArg:parseAndValidate(ply, arg, cmdInfo, plyRestrictions)
 	return ply
 end
-
 
 --[[
 	Class: cmds.StringArg
@@ -742,7 +727,7 @@ end
 
 		2.40 - Initial
 ]]
-cmds.StringArg = inheritsFrom( cmds.BaseArg )
+cmds.StringArg = inheritsFrom(cmds.BaseArg)
 
 
 --[[
@@ -750,21 +735,20 @@ cmds.StringArg = inheritsFrom( cmds.BaseArg )
 
 	A helper function to help us figure out restrictions on this command.
 ]]
-function cmds.StringArg:processRestrictions( cmdRestrictions, plyRestrictions )
-	self.restrictedCompletes = table.Copy( cmdRestrictions.completes ) -- Reset
-	self.playerLevelRestriction = nil -- Reset
+function cmds.StringArg:processRestrictions(cmdRestrictions, plyRestrictions)
+	self.restrictedCompletes = table.Copy(cmdRestrictions.completes) -- Reset
+	self.playerLevelRestriction = nil                               -- Reset
 
-	if plyRestrictions and plyRestrictions ~= "*" then -- Access tag restriction
+	if plyRestrictions and plyRestrictions ~= "*" then              -- Access tag restriction
 		self.playerLevelRestriction = true
-		local restricted = ULib.explode( ",", plyRestrictions )
-		if not self.restrictedCompletes or not table.HasValue( cmdRestrictions, cmds.restrictToCompletes ) then -- Easy, just set it
+		local restricted = ULib.explode(",", plyRestrictions)
+		if not self.restrictedCompletes or not table.HasValue(cmdRestrictions, cmds.restrictToCompletes) then -- Easy, just set it
 			self.restrictedCompletes = restricted
-
 		else -- Make a subset! We want to remove any values from self.restrictedCompletes that aren't in restricted
 			local i = 1
-			while self.restrictedCompletes[ i ] do
-				if not table.HasValue( restricted, self.restrictedCompletes[ i ] ) then
-					table.remove( self.restrictedCompletes, i )
+			while self.restrictedCompletes[i] do
+				if not table.HasValue(restricted, self.restrictedCompletes[i]) then
+					table.remove(self.restrictedCompletes, i)
 				else
 					i = i + 1
 				end
@@ -773,27 +757,26 @@ function cmds.StringArg:processRestrictions( cmdRestrictions, plyRestrictions )
 	end
 end
 
-
 --[[
 	Function: cmds.StringArg:parseAndValidate
 
 	See <cmds.BaseArg:parseAndValidate>
 ]]
-function cmds.StringArg:parseAndValidate( ply, arg, cmdInfo, plyRestrictions )
-	self:processRestrictions( cmdInfo, plyRestrictions )
+function cmds.StringArg:parseAndValidate(ply, arg, cmdInfo, plyRestrictions)
+	self:processRestrictions(cmdInfo, plyRestrictions)
 
-	if not arg and table.HasValue( cmdInfo, cmds.optional ) then
+	if not arg and table.HasValue(cmdInfo, cmds.optional) then
 		return cmdInfo.default or ""
 	end
 
-	if arg:find( "%c" ) then
+	if arg:find("%c") then
 		return nil, "string cannot contain control characters"
 	end
 
-	if table.HasValue( cmdInfo, cmds.restrictToCompletes ) or self.playerLevelRestriction then
-		if self.restrictedCompletes and not table.HasValue( self.restrictedCompletes, arg ) then
+	if table.HasValue(cmdInfo, cmds.restrictToCompletes) or self.playerLevelRestriction then
+		if self.restrictedCompletes and not table.HasValue(self.restrictedCompletes, arg) then
 			if cmdInfo.error then
-				return nil, string.format( cmdInfo.error, arg ) -- If it has '%s', replace with arg
+				return nil, string.format(cmdInfo.error, arg) -- If it has '%s', replace with arg
 			else
 				return nil, "invalid string"
 			end
@@ -803,50 +786,48 @@ function cmds.StringArg:parseAndValidate( ply, arg, cmdInfo, plyRestrictions )
 	return arg -- Everything's valid
 end
 
-
 --[[
 	Function: cmds.StringArg:complete
 
 	See <cmds.BaseArg:complete>
 ]]
-function cmds.StringArg:complete( ply, arg, cmdInfo, plyRestrictions )
+function cmds.StringArg:complete(ply, arg, cmdInfo, plyRestrictions)
 	if cmdInfo.autocomplete_fn then
-		return cmdInfo.autocomplete_fn( ply, arg, cmdInfo, plyRestrictions )
+		return cmdInfo.autocomplete_fn(ply, arg, cmdInfo, plyRestrictions)
 	end
 
-	self:processRestrictions( cmdInfo, plyRestrictions )
+	self:processRestrictions(cmdInfo, plyRestrictions)
 
 	if self.restrictedCompletes then
 		local ret = {}
-		for _, v in ipairs( self.restrictedCompletes ) do
-			if v:lower():sub( 1, arg:len() ) == arg:lower() then
-				if v:find( "%s" ) then
-					v = string.format( '"%s"', v )
+		for _, v in ipairs(self.restrictedCompletes) do
+			if v:lower():sub(1, arg:len()) == arg:lower() then
+				if v:find("%s") then
+					v = string.format('"%s"', v)
 				end
-				table.insert( ret, v )
+				table.insert(ret, v)
 			end
 		end
 
 		if #ret == 0 then
-			return {self:usage( cmdInfo, plyRestrictions )}
+			return { self:usage(cmdInfo, plyRestrictions) }
 		end
 		return ret
 	else
-		return {self:usage( cmdInfo, plyRestrictions )}
+		return { self:usage(cmdInfo, plyRestrictions) }
 	end
 end
-
 
 --[[
 	Function: cmds.StringArg:usage
 
 	See <cmds.BaseArg:usage>
 ]]
-function cmds.StringArg:usage( cmdInfo, plyRestrictions )
-	local isOptional = table.HasValue( cmdInfo, cmds.optional )
+function cmds.StringArg:usage(cmdInfo, plyRestrictions)
+	local isOptional = table.HasValue(cmdInfo, cmds.optional)
 	local str = cmdInfo.hint or "string"
 
-	if cmdInfo.repeat_min or table.HasValue( cmdInfo, cmds.takeRestOfLine ) then
+	if cmdInfo.repeat_min or table.HasValue(cmdInfo, cmds.takeRestOfLine) then
 		str = "{" .. str .. "}"
 	else
 		str = "<" .. str .. ">"
@@ -858,7 +839,6 @@ function cmds.StringArg:usage( cmdInfo, plyRestrictions )
 
 	return str
 end
-
 
 --------
 
@@ -872,73 +852,75 @@ end
 cmds.translatedCmds = cmds.translatedCmds or {}
 local translatedCmds = cmds.translatedCmds -- To save my fingers, quicker access time, etc
 
-local function translateCmdCallback( ply, commandName, argv )
-	local cmd = translatedCmds[ commandName:lower() ]
-	if not cmd then return error( "Invalid command!" ) end
+local function translateCmdCallback(ply, commandName, argv)
+	local cmd = translatedCmds[commandName:lower()]
+	if not cmd then return error("Invalid command!") end
 
-	local isOpposite = string.lower( cmd.opposite or "" ) == string.lower( commandName )
+	local isOpposite = string.lower(cmd.opposite or "") == string.lower(commandName)
 
-	local access, accessTag = ULib.ucl.query( ply, commandName )
+	local access, accessTag = ULib.ucl.query(ply, commandName)
 	if not access then
-		ULib.tsayError( ply, "You don't have access to this command, " .. ply:Nick() .. "!", true ) -- Print their name to intimidate them :)
+		ULib.tsayError(ply, "You don't have access to this command, " .. ply:Nick() .. "!", true) -- Print their name to intimidate them :)
 		return
 	end
 
 	local accessPieces = {}
 	if accessTag then
-		accessPieces = ULib.splitArgs( accessTag, "<", ">" )
+		accessPieces = ULib.splitArgs(accessTag, "<", ">")
 	end
 
 	local args = {}
 	local argNum = 1
-	for i, argInfo in ipairs( cmd.args ) do -- Translate each input arg into our output
-		if isOpposite and cmd.oppositeArgs[ i ] then
-			table.insert( args, cmd.oppositeArgs[ i ] )
+	for i, argInfo in ipairs(cmd.args) do -- Translate each input arg into our output
+		if isOpposite and cmd.oppositeArgs[i] then
+			table.insert(args, cmd.oppositeArgs[i])
 		else
-			if not argInfo.type.invisible and not argInfo.invisible and not argv[ argNum ] and not table.HasValue( argInfo, cmds.optional ) then
-				ULib.tsayError( ply, "Usage: " .. commandName .. " " .. cmd:getUsage( ply ), true )
+			if not argInfo.type.invisible and not argInfo.invisible and not argv[argNum] and not table.HasValue(argInfo, cmds.optional) then
+				ULib.tsayError(ply, "Usage: " .. commandName .. " " .. cmd:getUsage(ply), true)
 				return
 			end
 
 			local arg
-			if not argInfo.repeat_min and not table.HasValue( argInfo, cmds.takeRestOfLine ) then
-				arg = argv[ argNum ]
+			if not argInfo.repeat_min and not table.HasValue(argInfo, cmds.takeRestOfLine) then
+				arg = argv[argNum]
 			elseif not argInfo.repeat_min then
 				arg = ""
-				for i=argNum, #argv do
-					if argv[ i ]:find( "%s" ) then
-						arg = arg .. " " .. string.format( '"%s"', argv[ i ] )
+				for i = argNum, #argv do
+					if argv[i]:find("%s") then
+						arg = arg .. " " .. string.format('"%s"', argv[i])
 					else
-						arg = arg .. " " .. argv[ i ]
+						arg = arg .. " " .. argv[i]
 					end
 				end
 
 				arg = arg:Trim()
-				if arg:sub( 1, 1 ) == "\"" and arg:sub( -1, -1 ) == "\""
-					and arg:find( "\"", 2, true ) == arg:len() then -- If balanced single pair quotes, strip them
-					arg = ULib.stripQuotes( arg )
+				if arg:sub(1, 1) == "\"" and arg:sub(-1, -1) == "\""
+					and arg:find("\"", 2, true) == arg:len() then -- If balanced single pair quotes, strip them
+					arg = ULib.stripQuotes(arg)
 				end
 			end
 
 			if not argInfo.repeat_min then
-				local ret, err = argInfo.type:parseAndValidate( ply, arg, argInfo, accessPieces[ argNum ] )
+				local ret, err = argInfo.type:parseAndValidate(ply, arg, argInfo, accessPieces[argNum])
 				if ret == nil then
-					ULib.tsayError( ply, string.format( "Command \"%s\", argument #%i: %s", commandName, argNum, err ), true )
+					ULib.tsayError(ply, string.format("Command \"%s\", argument #%i: %s", commandName, argNum, err), true)
 					return
 				end
-				table.insert( args, ret )
+				table.insert(args, ret)
 			else
 				if #argv - argNum + 1 < argInfo.repeat_min then
-					ULib.tsayError( ply, string.format( "Command \"%s\", argument #%i: %s", commandName, #argv+1, "expected additional argument(s)" ), true )
+					ULib.tsayError(ply,
+						string.format("Command \"%s\", argument #%i: %s", commandName, #argv + 1,
+							"expected additional argument(s)"), true)
 					return
 				end
-				for i=argNum, #argv do
-					local ret, err = argInfo.type:parseAndValidate( ply, argv[ i ], argInfo, accessPieces[ argNum ] )
+				for i = argNum, #argv do
+					local ret, err = argInfo.type:parseAndValidate(ply, argv[i], argInfo, accessPieces[argNum])
 					if ret == nil then
-						ULib.tsayError( ply, string.format( "Command \"%s\", argument #%i: %s", commandName, i, err ), true )
+						ULib.tsayError(ply, string.format("Command \"%s\", argument #%i: %s", commandName, i, err), true)
 						return
 					end
-					table.insert( args, ret )
+					table.insert(args, ret)
 				end
 			end
 		end
@@ -948,98 +930,99 @@ local function translateCmdCallback( ply, commandName, argv )
 		end
 	end
 
-	cmd:call( isOpposite, unpack( args ) )
-	hook.Call( ULib.HOOK_POST_TRANSLATED_COMMAND, _, ply, commandName, args )
+	cmd:call(isOpposite, unpack(args))
+	hook.Call(ULib.HOOK_POST_TRANSLATED_COMMAND, _, ply, commandName, args)
 end
 
-local function translateAutocompleteCallback( commandName, args )
+local function translateAutocompleteCallback(commandName, args)
 	-- This function is some of the most obfuscated code I've ever written... really sorry about this.
 	-- This function was the unfortunate victim of feeping creaturism
-	local cmd = translatedCmds[ commandName:lower() ]
-	if not cmd then return error( "Invalid command!" ) end
+	local cmd = translatedCmds[commandName:lower()]
+	if not cmd then return error("Invalid command!") end
 
-	local isOpposite = string.lower( cmd.opposite or "" ) == string.lower( commandName )
+	local isOpposite = string.lower(cmd.opposite or "") == string.lower(commandName)
 	local ply
 	if CLIENT then
 		ply = LocalPlayer()
 	else
 		-- Assume listen server, seems to be the only time this can happen
-		ply = Entity( 1 ) -- Should be first player
+		ply = Entity(1) -- Should be first player
 		if not ply or not ply:IsValid() or not ply:IsListenServerHost() then
-			return error( "Assumption fail!" )
+			return error("Assumption fail!")
 		end
 	end
 
-	local access, accessTag = ULib.ucl.query( ply, commandName ) -- We don't actually care if they have access or not, complete anyways
-	local takes_rest_of_line = table.HasValue( cmd.args[ #cmd.args ], cmds.takeRestOfLine ) or cmd.args[ #cmd.args ].repeat_min
+	local access, accessTag = ULib.ucl.query(ply, commandName) -- We don't actually care if they have access or not, complete anyways
+	local takes_rest_of_line = table.HasValue(cmd.args[#cmd.args], cmds.takeRestOfLine) or
+	cmd.args[#cmd.args].repeat_min
 
 	local accessPieces = {}
 	if accessTag then
-		accessPieces = ULib.splitArgs( accessTag, "<", ">" )
+		accessPieces = ULib.splitArgs(accessTag, "<", ">")
 	end
 
 	local ret = {}
-	local argv, mismatched_quotes = ULib.splitArgs( args )
+	local argv, mismatched_quotes = ULib.splitArgs(args)
 	local argn = #argv
 	-- If the last character is a space and they're not in a quote right now...
-	local on_new_arg = args == "" or (args:sub( -1 ) == " " and not mismatched_quotes)
+	local on_new_arg = args == "" or (args:sub(-1) == " " and not mismatched_quotes)
 	if on_new_arg then argn = argn + 1 end
 	local hidden_argn = argn -- Argn with invisible included
-	for i=1, argn do
-		if cmd.args[ i ] and (cmd.args[ i ].type.invisible or cmd.args[ i ].invisible) then
+	for i = 1, argn do
+		if cmd.args[i] and (cmd.args[i].type.invisible or cmd.args[i].invisible) then
 			hidden_argn = hidden_argn + 1
 		end
 	end
-	while cmd.args[ hidden_argn ] and (cmd.args[ hidden_argn ].type.invisible or cmd.args[ hidden_argn ].invisible) do
+	while cmd.args[hidden_argn] and (cmd.args[hidden_argn].type.invisible or cmd.args[hidden_argn].invisible) do
 		hidden_argn = hidden_argn + 1 -- Advance to next visible arg
 	end
 	-- Now, if this is taking the rest of the line... forget the above
 	if hidden_argn > #cmd.args and takes_rest_of_line then
 		hidden_argn = #cmd.args
 		argn = hidden_argn
-		for i=1, argn do
-			if cmd.args[ i ] and (cmd.args[ i ].type.invisible or cmd.args[ i ].invisible) then
+		for i = 1, argn do
+			if cmd.args[i] and (cmd.args[i].type.invisible or cmd.args[i].invisible) then
 				argn = argn - 1
 			end
 		end
 	end
 	local completedArgs = ""
 	local partialArg = ""
-	for i=1, #argv do
-		local str = argv[ i ]
-		if str:find( "%s" ) then
-			str = string.format( '"%s"', str )
+	for i = 1, #argv do
+		local str = argv[i]
+		if str:find("%s") then
+			str = string.format('"%s"', str)
 		end
-		if i < argn or (cmd.args[ #cmd.args ].repeat_min and i < #argv+(on_new_arg and 1 or 0)) then
+		if i < argn or (cmd.args[#cmd.args].repeat_min and i < #argv + (on_new_arg and 1 or 0)) then
 			completedArgs = completedArgs .. str .. " "
 		else
 			partialArg = partialArg .. str .. " "
 		end
 	end
 	completedArgs = completedArgs:Trim()
-	partialArg = ULib.stripQuotes( partialArg:Trim() )
+	partialArg = ULib.stripQuotes(partialArg:Trim())
 
-	if isOpposite and cmd.oppositeArgs[ hidden_argn ] then
+	if isOpposite and cmd.oppositeArgs[hidden_argn] then
 		local str = commandName .. " "
 		if completedArgs and completedArgs:len() > 0 then
 			str = str .. completedArgs .. " "
 		end
-		table.insert( ret, str .. cmd.oppositeArgs[ hidden_argn ] )
-	elseif cmd.args[ hidden_argn ] then
+		table.insert(ret, str .. cmd.oppositeArgs[hidden_argn])
+	elseif cmd.args[hidden_argn] then
 		-- First, get the completes as reported by this type
-		if cmd.args[ #cmd.args ].repeat_min then
-			partialArg = argv[ #argv ]
-			if args == "" or (args:sub( -1 ) == " " and not mismatched_quotes) then partialArg = nil end
+		if cmd.args[#cmd.args].repeat_min then
+			partialArg = argv[#argv]
+			if args == "" or (args:sub(-1) == " " and not mismatched_quotes) then partialArg = nil end
 		end
-		ret = cmd.args[ hidden_argn ].type:complete( ply, partialArg or "", cmd.args[ hidden_argn ], accessPieces[ argn ] )
+		ret = cmd.args[hidden_argn].type:complete(ply, partialArg or "", cmd.args[hidden_argn], accessPieces[argn])
 
 		-- Now let's add the prefix to the completes
 		local prefix = commandName .. " "
 		if completedArgs:len() > 0 then
 			prefix = prefix .. completedArgs .. " "
 		end
-		for k, v in ipairs( ret ) do
-			ret[ k ] = prefix .. v
+		for k, v in ipairs(ret) do
+			ret[k] = prefix .. v
 		end
 	end
 
@@ -1064,7 +1047,7 @@ end
 
 		v2.40 - Initial
 ]]
-cmds.TranslateCommand = inheritsFrom( nil )
+cmds.TranslateCommand = inheritsFrom(nil)
 
 
 --[[
@@ -1081,26 +1064,26 @@ cmds.TranslateCommand = inheritsFrom( nil )
 			the chat command and arguments required?
 		unsafe - *(Optional, defaults to false)* Flag for ULib.execString, which disallows execution from untrusted config.
 ]]
-function cmds.TranslateCommand:instantiate( cmd, fn, say_cmd, hide_say, no_space_in_say, unsafe )
-	ULib.checkArg( 1, "ULib.cmds.TranslateCommand", "string", cmd, 5 )
+function cmds.TranslateCommand:instantiate(cmd, fn, say_cmd, hide_say, no_space_in_say, unsafe)
+	ULib.checkArg(1, "ULib.cmds.TranslateCommand", "string", cmd, 5)
 	if SERVER then
-		ULib.checkArg( 2, "ULib.cmds.TranslateCommand", "function", fn, 5 )
+		ULib.checkArg(2, "ULib.cmds.TranslateCommand", "function", fn, 5)
 	else
-		ULib.checkArg( 2, "ULib.cmds.TranslateCommand", {"nil", "function"}, fn, 5 )
+		ULib.checkArg(2, "ULib.cmds.TranslateCommand", { "nil", "function" }, fn, 5)
 	end
-	ULib.checkArg( 3, "ULib.cmds.TranslateCommand", {"nil", "string", "table"}, say_cmd, 5 )
-	ULib.checkArg( 4, "ULib.cmds.TranslateCommand", {"nil", "boolean"}, hide_say, 5 )
-	ULib.checkArg( 5, "ULib.cmds.TranslateCommand", {"nil", "boolean"}, no_space_in_say, 5 )
-	ULib.checkArg( 6, "ULib.cmds.TranslateCommand", {"nil", "boolean"}, unsafe, 5 )
+	ULib.checkArg(3, "ULib.cmds.TranslateCommand", { "nil", "string", "table" }, say_cmd, 5)
+	ULib.checkArg(4, "ULib.cmds.TranslateCommand", { "nil", "boolean" }, hide_say, 5)
+	ULib.checkArg(5, "ULib.cmds.TranslateCommand", { "nil", "boolean" }, no_space_in_say, 5)
+	ULib.checkArg(6, "ULib.cmds.TranslateCommand", { "nil", "boolean" }, unsafe, 5)
 
 	self.args = {}
 	self.fn = fn
 	self.cmd = cmd -- We need this for usage print
-	translatedCmds[ cmd:lower() ] = self
+	translatedCmds[cmd:lower()] = self
 
-	cmds.addCommand( cmd, translateCmdCallback, translateAutocompleteCallback, cmd, say_cmd, hide_say, no_space_in_say, unsafe )
+	cmds.addCommand(cmd, translateCmdCallback, translateAutocompleteCallback, cmd, say_cmd, hide_say, no_space_in_say,
+		unsafe)
 end
-
 
 --[[
 	Function: cmds.TranslateCommand:addParam
@@ -1111,13 +1094,12 @@ end
 
 		t - A table containing the information on this argument.
 ]]
-function cmds.TranslateCommand:addParam( t )
-	ULib.checkArg( 1, "ULib.cmds.TranslateCommand:addParam", "table", t )
+function cmds.TranslateCommand:addParam(t)
+	ULib.checkArg(1, "ULib.cmds.TranslateCommand:addParam", "table", t)
 
 	t.cmd = self.cmd
-	table.insert( self.args, t )
+	table.insert(self.args, t)
 end
-
 
 --[[
 	Function: cmds.TranslateCommand:setOpposite
@@ -1146,24 +1128,23 @@ end
 
 :myCmd:setOpposite( "unjail", { _, 0 }, "!unjail" )
 ]]
-function cmds.TranslateCommand:setOpposite( cmd, args, say_cmd, hide_say, no_space_in_say )
-	ULib.checkArg( 1, "ULib.cmds.TranslateCommand:setOpposite", "string", cmd )
-	ULib.checkArg( 2, "ULib.cmds.TranslateCommand:setOpposite", "table", args )
-	ULib.checkArg( 3, "ULib.cmds.TranslateCommand:setOpposite", {"nil", "string", "table"}, say_cmd )
-	ULib.checkArg( 4, "ULib.cmds.TranslateCommand:setOpposite", {"nil", "boolean"}, hide_say )
-	ULib.checkArg( 5, "ULib.cmds.TranslateCommand:setOpposite", {"nil", "boolean"}, no_space_in_say )
+function cmds.TranslateCommand:setOpposite(cmd, args, say_cmd, hide_say, no_space_in_say)
+	ULib.checkArg(1, "ULib.cmds.TranslateCommand:setOpposite", "string", cmd)
+	ULib.checkArg(2, "ULib.cmds.TranslateCommand:setOpposite", "table", args)
+	ULib.checkArg(3, "ULib.cmds.TranslateCommand:setOpposite", { "nil", "string", "table" }, say_cmd)
+	ULib.checkArg(4, "ULib.cmds.TranslateCommand:setOpposite", { "nil", "boolean" }, hide_say)
+	ULib.checkArg(5, "ULib.cmds.TranslateCommand:setOpposite", { "nil", "boolean" }, no_space_in_say)
 
 	self.opposite = cmd
-	translatedCmds[ cmd:lower() ] = self
+	translatedCmds[cmd:lower()] = self
 	self.oppositeArgs = args
 
-	cmds.addCommand( cmd, translateCmdCallback, translateAutocompleteCallback, cmd, say_cmd, hide_say, no_space_in_say )
+	cmds.addCommand(cmd, translateCmdCallback, translateAutocompleteCallback, cmd, say_cmd, hide_say, no_space_in_say)
 
 	if self.default_access then
-		self:defaultAccess( self.default_access )
+		self:defaultAccess(self.default_access)
 	end
 end
-
 
 --[[
 	Function: cmds.TranslateCommand:getUsage
@@ -1176,28 +1157,27 @@ end
 
 		A string of the usage information for this command.
 ]]
-function cmds.TranslateCommand:getUsage( ply )
-	ULib.checkArg( 1, "ULib.cmds.TranslateCommand:getUsage", {"Entity", "Player"}, ply )
+function cmds.TranslateCommand:getUsage(ply)
+	ULib.checkArg(1, "ULib.cmds.TranslateCommand:getUsage", { "Entity", "Player" }, ply)
 
-	local access, accessTag = ULib.ucl.query( ply, self.cmd ) -- We only want the accessTag
+	local access, accessTag = ULib.ucl.query(ply, self.cmd) -- We only want the accessTag
 
 	local accessPieces = {}
 	if accessTag then
-		accessPieces = ULib.explode( "%s+", accessTag )
+		accessPieces = ULib.explode("%s+", accessTag)
 	end
 
 	local str = ""
 	local argNum = 1
-	for i, argInfo in ipairs( self.args ) do
+	for i, argInfo in ipairs(self.args) do
 		if not argInfo.type.invisible and not argInfo.invisible then
-			str = str .. " " .. argInfo.type:usage( argInfo, accessPieces[ argNum ] )
+			str = str .. " " .. argInfo.type:usage(argInfo, accessPieces[argNum])
 			argNum = argNum + 1
 		end
 	end
 
 	return str:Trim()
 end
-
 
 --[[
 	Function: cmds.TranslateCommand:call
@@ -1211,10 +1191,9 @@ end
 		isOpposite - Is this the opposite command that's being called?
 		... - The args that will be passed to the function callback.
 ]]
-function cmds.TranslateCommand:call( isOpposite, ... )
-	return self.fn( ... )
+function cmds.TranslateCommand:call(isOpposite, ...)
+	return self.fn(...)
 end
-
 
 --[[
 	Function: cmds.TranslateCommand:defaultAccess
@@ -1224,14 +1203,14 @@ end
 		access - The group or groups that should have access to this command by
 			default.
 ]]
-function cmds.TranslateCommand:defaultAccess( access )
-	ULib.checkArg( 1, "ULib.cmds.TranslateCommand:defaultAccess", "string", access )
+function cmds.TranslateCommand:defaultAccess(access)
+	ULib.checkArg(1, "ULib.cmds.TranslateCommand:defaultAccess", "string", access)
 
 	if CLIENT then return end
-	ULib.ucl.registerAccess( self.cmd, access, "Grants access to the " .. self.cmd .. " command", "Command" )
+	ULib.ucl.registerAccess(self.cmd, access, "Grants access to the " .. self.cmd .. " command", "Command")
 
 	if self.opposite then
-		ULib.ucl.registerAccess( self.opposite, access, "Grants access to the " .. self.opposite .. " command", "Command" )
+		ULib.ucl.registerAccess(self.opposite, access, "Grants access to the " .. self.opposite .. " command", "Command")
 	end
 
 	self.default_access = access
@@ -1266,38 +1245,37 @@ local sayCommandCallback
 
 		v2.62 - Initial
 ]]
-function cmds.getCommandTableAndArgv( commandName, argv, valveErrorCorrection )
+function cmds.getCommandTableAndArgv(commandName, argv, valveErrorCorrection)
 	if valveErrorCorrection then
 		local args = ""
-		for k, v in ipairs( argv ) do
-			args = string.format( '%s"%s" ', args, v )
+		for k, v in ipairs(argv) do
+			args = string.format('%s"%s" ', args, v)
 		end
-		args = string.Trim( args ) -- Remove that last space we added
+		args = string.Trim(args)         -- Remove that last space we added
 
-		args = args:gsub( "\" \":\" \"", ":" ) -- Valve error correction.
-		args = args:gsub( "\" \"'\" \"", "'" ) -- Valve error correction.
-		argv = ULib.splitArgs( args ) -- We're going to go ahead and reparse argv to fix the errors.
+		args = args:gsub("\" \":\" \"", ":") -- Valve error correction.
+		args = args:gsub("\" \"'\" \"", "'") -- Valve error correction.
+		argv = ULib.splitArgs(args)      -- We're going to go ahead and reparse argv to fix the errors.
 	else
-		argv = table.Copy( argv )
+		argv = table.Copy(argv)
 	end
 
 	-- Find the most specific command we have defined
-	local currTable = routedCmds[ commandName:lower() ]
+	local currTable = routedCmds[commandName:lower()]
 	if not currTable then return nil end
 
-	local nextWord = table.remove( argv, 1 )
-	while nextWord and currTable[ nextWord:lower() ] do
+	local nextWord = table.remove(argv, 1)
+	while nextWord and currTable[nextWord:lower()] do
 		commandName = commandName .. " " .. nextWord
-		currTable = currTable[ nextWord:lower() ]
+		currTable = currTable[nextWord:lower()]
 
-		nextWord = table.remove( argv, 1 )
+		nextWord = table.remove(argv, 1)
 	end
-	table.insert( argv, 1, nextWord ) -- Stick it in again, the last one was invalid
+	table.insert(argv, 1, nextWord) -- Stick it in again, the last one was invalid
 	-- Done finding
 
 	return currTable, commandName, argv
 end
-
 
 --[[
 	Function: cmds.execute
@@ -1316,23 +1294,23 @@ end
 
 		v2.62 - Initial
 ]]
-function cmds.execute( cmdTable, ply, commandName, argv )
+function cmds.execute(cmdTable, ply, commandName, argv)
 	if CLIENT and not cmdTable.__client_only then
-		ULib.redirect( ply, commandName, argv )
+		ULib.redirect(ply, commandName, argv)
 		return
 	end
 
 	if not cmdTable.__fn then
-		return error( "Attempt to call undefined command: " .. commandName )
+		return error("Attempt to call undefined command: " .. commandName)
 	end
 
-	local return_value = hook.Call( ULib.HOOK_COMMAND_CALLED, _, ply, commandName, argv )
+	local return_value = hook.Call(ULib.HOOK_COMMAND_CALLED, _, ply, commandName, argv)
 	if return_value ~= false then
-		cmdTable.__fn( ply, commandName, argv )
+		cmdTable.__fn(ply, commandName, argv)
 	end
 end
 
-local function routedCommandCallback( ply, commandName, argv )
+local function routedCommandCallback(ply, commandName, argv)
 	local curtime = CurTime()
 	if not ply.ulib_threat_level or ply.ulib_threat_time <= curtime then
 		ply.ulib_threat_level = 1
@@ -1340,7 +1318,7 @@ local function routedCommandCallback( ply, commandName, argv )
 		ply.ulib_threat_warned = nil
 	elseif ply.ulib_threat_level >= 100 then
 		if not ply.ulib_threat_warned then
-			ULib.tsay( ply, "You are running too many commands too quickly, please wait before executing more" )
+			ULib.tsay(ply, "You are running too many commands too quickly, please wait before executing more")
 			ply.ulib_threat_warned = true
 		end
 		return
@@ -1349,47 +1327,47 @@ local function routedCommandCallback( ply, commandName, argv )
 	end
 
 
-	if not routedCmds[ commandName:lower() ] then
-		return error( "Base command \"" .. commandName .. "\" is not defined!" )
+	if not routedCmds[commandName:lower()] then
+		return error("Base command \"" .. commandName .. "\" is not defined!")
 	end
 
 	local currTable
-	currTable, commandName, argv = cmds.getCommandTableAndArgv( commandName, argv, true )
-	cmds.execute( currTable, ply, commandName, argv )
+	currTable, commandName, argv = cmds.getCommandTableAndArgv(commandName, argv, true)
+	cmds.execute(currTable, ply, commandName, argv)
 end
 
 if SERVER then
-	sayCommandCallback = function( ply, sayCommand, argv )
-		if not sayCmds[ sayCommand ] then
-			return error( "Say command \"" .. sayCommand .. "\" is not defined!" )
+	sayCommandCallback = function(ply, sayCommand, argv)
+		if not sayCmds[sayCommand] then
+			return error("Say command \"" .. sayCommand .. "\" is not defined!")
 		end
 
-		sayCmds[ sayCommand ].__fn( ply, sayCmds[ sayCommand ].__cmd, argv )
+		sayCmds[sayCommand].__fn(ply, sayCmds[sayCommand].__cmd, argv)
 	end
 
-	local function hookRoute( ply, command, argv )
+	local function hookRoute(ply, command, argv)
 		if #argv > 0 then
-			local commandName = table.remove( argv, 1 )
-			if routedCmds[ commandName:lower() ] then
-				routedCommandCallback( ply, commandName, argv )
+			local commandName = table.remove(argv, 1)
+			if routedCmds[commandName:lower()] then
+				routedCommandCallback(ply, commandName, argv)
 			end
 		end
 	end
-	concommand.Add( "_u", hookRoute )
+	concommand.Add("_u", hookRoute)
 end
 
-local function autocompleteCallback( commandName, args )
-	args = args:gsub( "^%s*", "" ) -- Trim left side
+local function autocompleteCallback(commandName, args)
+	args = args:gsub("^%s*", "") -- Trim left side
 
 	-- Find the most specific command we have defined
-	local currTable = routedCmds[ commandName:lower() ]
-	local dummy, dummy, nextWord = args:find( "^(%S+)%s" )
-	while nextWord and currTable[ nextWord:lower() ] do
+	local currTable = routedCmds[commandName:lower()]
+	local dummy, dummy, nextWord = args:find("^(%S+)%s")
+	while nextWord and currTable[nextWord:lower()] do
 		commandName = commandName .. " " .. nextWord
-		currTable = currTable[ nextWord:lower() ]
-		args = args:gsub( ULib.makePatternSafe( nextWord ) .. "%s+", "", 1 )
+		currTable = currTable[nextWord:lower()]
+		args = args:gsub(ULib.makePatternSafe(nextWord) .. "%s+", "", 1)
 
-		dummy, dummy, nextWord = args:find( "^(%S+)%s" )
+		dummy, dummy, nextWord = args:find("^(%S+)%s")
 	end
 	-- Done finding
 
@@ -1399,26 +1377,26 @@ local function autocompleteCallback( commandName, args )
 			ply = LocalPlayer()
 		else
 			-- Assume listen server, seems to be the only time this can happen
-			ply = Entity( 1 ) -- Should be first player
+			ply = Entity(1) -- Should be first player
 			if not ply or not ply:IsValid() or not ply:IsListenServerHost() then
-				return error( "Assumption fail!" )
+				return error("Assumption fail!")
 			end
 		end
 
 		local ret = {}
-		for cmd, cmdInfo in pairs( currTable ) do
+		for cmd, cmdInfo in pairs(currTable) do
 			if cmd ~= "__fn" and cmd ~= "__word" and cmd ~= "__access_string" and cmd ~= "__client_only" then
-				if cmd:sub( 1, args:len() ) == args and (not cmdInfo.__access_string or ply:query( cmdInfo.__access_string )) then -- Ensure access
-					table.insert( ret, commandName .. " " .. cmdInfo.__word ) -- Pull in properly cased autocomplete
+				if cmd:sub(1, args:len()) == args and (not cmdInfo.__access_string or ply:query(cmdInfo.__access_string)) then -- Ensure access
+					table.insert(ret, commandName .. " " .. cmdInfo.__word)                                            -- Pull in properly cased autocomplete
 				end
 			end
 		end
 
-		table.sort( ret )
+		table.sort(ret)
 		return ret
 	end
 
-	return currTable.__autocomplete( commandName, args )
+	return currTable.__autocomplete(commandName, args)
 end
 
 
@@ -1483,27 +1461,27 @@ end
 		v2.63 - Added unsafe flag
 		v2.40 - Initial
 ]]
-function cmds.addCommand( cmd, fn, autocomplete, access_string, say_cmd, hide_say, no_space_in_say, unsafe )
-	ULib.checkArg( 1, "ULib.cmds.addCommand", "string", cmd )
+function cmds.addCommand(cmd, fn, autocomplete, access_string, say_cmd, hide_say, no_space_in_say, unsafe)
+	ULib.checkArg(1, "ULib.cmds.addCommand", "string", cmd)
 	if SERVER then
-		ULib.checkArg( 2, "ULib.cmds.addCommand", "function", fn )
+		ULib.checkArg(2, "ULib.cmds.addCommand", "function", fn)
 	else
-		ULib.checkArg( 2, "ULib.cmds.addCommand", {"nil", "function"}, fn )
+		ULib.checkArg(2, "ULib.cmds.addCommand", { "nil", "function" }, fn)
 	end
-	ULib.checkArg( 3, "ULib.cmds.addCommand", {"nil", "function"}, autocomplete )
-	ULib.checkArg( 4, "ULib.cmds.addCommand", {"nil", "string"}, access_string )
-	ULib.checkArg( 5, "ULib.cmds.addCommand", {"nil", "string", "table"}, say_cmd )
-	ULib.checkArg( 6, "ULib.cmds.addCommand", {"nil", "boolean"}, hide_say )
-	ULib.checkArg( 7, "ULib.cmds.addCommand", {"nil", "boolean"}, no_space_in_say )
-	ULib.checkArg( 8, "ULib.cmds.addCommand", {"nil", "boolean"}, unsafe )
+	ULib.checkArg(3, "ULib.cmds.addCommand", { "nil", "function" }, autocomplete)
+	ULib.checkArg(4, "ULib.cmds.addCommand", { "nil", "string" }, access_string)
+	ULib.checkArg(5, "ULib.cmds.addCommand", { "nil", "string", "table" }, say_cmd)
+	ULib.checkArg(6, "ULib.cmds.addCommand", { "nil", "boolean" }, hide_say)
+	ULib.checkArg(7, "ULib.cmds.addCommand", { "nil", "boolean" }, no_space_in_say)
+	ULib.checkArg(8, "ULib.cmds.addCommand", { "nil", "boolean" }, unsafe)
 
-	local words = ULib.explode( "%s", cmd )
+	local words = ULib.explode("%s", cmd)
 	local currTable = routedCmds
 
-	for _, word in ipairs( words ) do
+	for _, word in ipairs(words) do
 		local lowerWord = word:lower() -- Don't need it anymore
-		currTable[ lowerWord ] = currTable[ lowerWord ] or {}
-		currTable = currTable[ lowerWord ]
+		currTable[lowerWord] = currTable[lowerWord] or {}
+		currTable = currTable[lowerWord]
 		currTable.__word = word
 	end
 
@@ -1512,22 +1490,22 @@ function cmds.addCommand( cmd, fn, autocomplete, access_string, say_cmd, hide_sa
 	currTable.__access_string = access_string
 	currTable.__unsafe = unsafe
 
-	local dummy, dummy, prefix = cmd:find( "^(%S+)" )
-	concommand.Add( prefix, routedCommandCallback, autocompleteCallback )
+	local dummy, dummy, prefix = cmd:find("^(%S+)")
+	concommand.Add(prefix, routedCommandCallback, autocompleteCallback)
 
 	if SERVER and say_cmd then
-		if type( say_cmd ) == "string" then say_cmd = { say_cmd } end
+		if type(say_cmd) == "string" then say_cmd = { say_cmd } end
 
-		for i=1, #say_cmd do
+		for i = 1, #say_cmd do
 			local t = {}
-			sayCmds[ say_cmd[ i ] ] = t
+			sayCmds[say_cmd[i]] = t
 			t.__fn = fn
 			t.__cmd = cmd
 
-			ULib.addSayCommand( say_cmd[ i ], sayCommandCallback, cmd, hide_say, no_space_in_say )
+			ULib.addSayCommand(say_cmd[i], sayCommandCallback, cmd, hide_say, no_space_in_say)
 
-			local translatedCommand =  say_cmd[ i ] .. (no_space_in_say and "" or " ")
-			ULib.sayCmds[ translatedCommand:lower() ].__cmd = cmd -- Definitely needs refactoring at some point...
+			local translatedCommand = say_cmd[i] .. (no_space_in_say and "" or " ")
+			ULib.sayCmds[translatedCommand:lower()].__cmd = cmd -- Definitely needs refactoring at some point...
 		end
 	end
 end
@@ -1543,19 +1521,19 @@ end
 		v2.63 - Added unsafe flag
 		v2.40 - Initial
 ]]
-function cmds.addCommandClient( cmd, fn, autocomplete, unsafe )
-	ULib.checkArg( 1, "ULib.cmds.addCommandClient", "string", cmd )
-	ULib.checkArg( 2, "ULib.cmds.addCommandClient", {"nil", "function"}, fn )
-	ULib.checkArg( 3, "ULib.cmds.addCommandClient", {"nil", "function"}, autocomplete )
-	ULib.checkArg( 4, "ULib.cmds.addCommandClient", {"nil", "boolean"}, unsafe )
+function cmds.addCommandClient(cmd, fn, autocomplete, unsafe)
+	ULib.checkArg(1, "ULib.cmds.addCommandClient", "string", cmd)
+	ULib.checkArg(2, "ULib.cmds.addCommandClient", { "nil", "function" }, fn)
+	ULib.checkArg(3, "ULib.cmds.addCommandClient", { "nil", "function" }, autocomplete)
+	ULib.checkArg(4, "ULib.cmds.addCommandClient", { "nil", "boolean" }, unsafe)
 
-	local words = ULib.explode( "%s", cmd )
+	local words = ULib.explode("%s", cmd)
 	local currTable = routedCmds
 
-	for _, word in ipairs( words ) do
+	for _, word in ipairs(words) do
 		local lowerWord = word:lower() -- Don't need it anymore
-		currTable[ lowerWord ] = currTable[ lowerWord ] or {}
-		currTable = currTable[ lowerWord ]
+		currTable[lowerWord] = currTable[lowerWord] or {}
+		currTable = currTable[lowerWord]
 		currTable.__word = word
 	end
 
@@ -1564,6 +1542,6 @@ function cmds.addCommandClient( cmd, fn, autocomplete, unsafe )
 	currTable.__client_only = true
 	currTable.__unsafe = unsafe
 
-	local dummy, dummy, prefix = cmd:find( "^(%S+)" )
-	concommand.Add( prefix, routedCommandCallback, autocompleteCallback )
+	local dummy, dummy, prefix = cmd:find("^(%S+)")
+	concommand.Add(prefix, routedCommandCallback, autocompleteCallback)
 end

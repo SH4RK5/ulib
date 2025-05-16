@@ -20,8 +20,8 @@
 
 		v2.10 - Added fade parameter
 ]]
-function ULib.csayDraw( msg, color, duration, fade )
-	color = color or Color( 255, 255, 255, 255 )
+function ULib.csayDraw(msg, color, duration, fade)
+	color = color or Color(255, 255, 255, 255)
 	duration = duration or 5
 	fade = fade or 0.5
 	local start = CurTime()
@@ -31,13 +31,13 @@ function ULib.csayDraw( msg, color, duration, fade )
 		local dtime = CurTime() - start
 
 		if dtime > duration then -- Our time has come :'(
-			hook.Remove( "HUDPaint", "CSayHelperDraw" )
+			hook.Remove("HUDPaint", "CSayHelperDraw")
 			return
 		end
 
 		if fade - dtime > 0 then -- beginning fade
 			alpha = (fade - dtime) / fade -- 0 to 1
-			alpha = 1 - alpha -- Reverse
+			alpha = 1 - alpha    -- Reverse
 			alpha = alpha * 255
 		end
 
@@ -45,10 +45,10 @@ function ULib.csayDraw( msg, color, duration, fade )
 			alpha = (duration - dtime) / fade -- 0 to 1
 			alpha = alpha * 255
 		end
-		color.a  = alpha
+		color.a = alpha
 
-		draw.DrawText( msg, "TargetID", ScrW() * 0.5, ScrH() * 0.25, color, TEXT_ALIGN_CENTER )
+		draw.DrawText(msg, "TargetID", ScrW() * 0.5, ScrH() * 0.25, color, TEXT_ALIGN_CENTER)
 	end
 
-	hook.Add( "HUDPaint", "CSayHelperDraw", drawToScreen )
+	hook.Add("HUDPaint", "CSayHelperDraw", drawToScreen)
 end

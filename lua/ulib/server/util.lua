@@ -22,15 +22,15 @@
 
 		v2.40 - Initial.
 ]]
-function ULib.clientRPC( plys, fn, ... )
-	ULib.checkArg( 1, "ULib.clientRPC", {"nil","Player","table"}, plys )
-	ULib.checkArg( 2, "ULib.clientRPC", {"string"}, fn )
+function ULib.clientRPC(plys, fn, ...)
+	ULib.checkArg(1, "ULib.clientRPC", { "nil", "Player", "table" }, plys)
+	ULib.checkArg(2, "ULib.clientRPC", { "string" }, fn)
 
-	net.Start( "URPC" )
-	net.WriteString( fn )
-	net.WriteTable( {...} )
+	net.Start("URPC")
+	net.WriteString(fn)
+	net.WriteTable({ ... })
 	if plys then
-		net.Send( plys )
+		net.Send(plys)
 	else
 		net.Broadcast()
 	end
@@ -48,18 +48,17 @@ end
 		volume - *(Optional, defaults to 1)* The volume to make the sound.
 		pitch - *(Optional, defaults to 1)* The pitch to make the sound, 1 = normal.
 ]]
-function ULib.play3DSound( sound, vector, volume, pitch )
+function ULib.play3DSound(sound, vector, volume, pitch)
 	volume = volume or 100
 	pitch = pitch or 100
 
-	local ent = ents.Create( "info_null" )
+	local ent = ents.Create("info_null")
 	if not ent:IsValid() then return end
-	ent:SetPos( vector )
+	ent:SetPos(vector)
 	ent:Spawn()
 	ent:Activate()
-	ent:EmitSound( sound, volume, pitch )
+	ent:EmitSound(sound, volume, pitch)
 end
-
 
 --[[
 	Function: getAllReadyPlayers
@@ -72,17 +71,17 @@ end
 ]]
 function ULib.getAllReadyPlayers()
 	local players = player.GetAll()
-	for i=#players, 1, -1 do
-		if not players[ i ].ulib_ready then
-			table.remove( players, i )
+	for i = #players, 1, -1 do
+		if not players[i].ulib_ready then
+			table.remove(players, i)
 		end
 	end
 
 	return players
 end
 
-
-ULib.repcvars = ULib.repcvars or {} -- This is used for <ULib.replicatedWithWritableCvar> in order to keep track of valid cvars and access info.
+ULib.repcvars = ULib.repcvars or
+{}                                  -- This is used for <ULib.replicatedWithWritableCvar> in order to keep track of valid cvars and access info.
 local repcvars = ULib.repcvars
 local repCvarServerChanged
 --[[
@@ -110,7 +109,7 @@ local repCvarServerChanged
 		v2.40 - Initial.
 		v2.50 - Changed to not depend on the replicated cvars themselves due to Garry-breakage.
 ]]
-function ULib.replicatedWritableCvar( sv_cvar, cl_cvar, default_value, save, notify, access )
+function ULib.replicatedWritableCvar(sv_cvar, cl_cvar, default_value, save, notify, access)
 	sv_cvar = sv_cvar:lower()
 	cl_cvar = cl_cvar:lower()
 	default_value = tostring(default_value)
@@ -123,87 +122,85 @@ function ULib.replicatedWritableCvar( sv_cvar, cl_cvar, default_value, save, not
 		flags = flags + FCVAR_NOTIFY
 	end
 
-	local cvar_obj = GetConVar( sv_cvar ) or CreateConVar( sv_cvar, default_value, flags )
-	
-	
+	local cvar_obj = GetConVar(sv_cvar) or CreateConVar(sv_cvar, default_value, flags)
+
+
 	net.Start("ulib_repWriteCvar")
-		net.WriteString( sv_cvar )
-		net.WriteString( cl_cvar )
-		net.WriteString( default_value )
-		net.WriteString( cvar_obj:GetString() )
+	net.WriteString(sv_cvar)
+	net.WriteString(cl_cvar)
+	net.WriteString(default_value)
+	net.WriteString(cvar_obj:GetString())
 	net.Broadcast()
 
-	repcvars[ sv_cvar ] = { access=access, default=default_value, cl_cvar=cl_cvar, cvar_obj=cvar_obj }
-	cvars.AddChangeCallback( sv_cvar, repCvarServerChanged )
+	repcvars[sv_cvar] = { access = access, default = default_value, cl_cvar = cl_cvar, cvar_obj = cvar_obj }
+	cvars.AddChangeCallback(sv_cvar, repCvarServerChanged)
 
-	hook.Call( ULib.HOOK_REPCVARCHANGED, _, sv_cvar, cl_cvar, nil, nil, cvar_obj:GetString() )
+	hook.Call(ULib.HOOK_REPCVARCHANGED, _, sv_cvar, cl_cvar, nil, nil, cvar_obj:GetString())
 
 	return cvar_obj
 end
 
-local function repCvarOnJoin( ply )
-	for sv_cvar, v in pairs( repcvars ) do
-	
+local function repCvarOnJoin(ply)
+	for sv_cvar, v in pairs(repcvars) do
 		net.Start("ulib_repWriteCvar")
-			net.WriteString( sv_cvar )
-			net.WriteString( v.cl_cvar )
-			net.WriteString( v.default )
-			net.WriteString( v.cvar_obj:GetString() )
-		net.Send( ply )
-		
+		net.WriteString(sv_cvar)
+		net.WriteString(v.cl_cvar)
+		net.WriteString(v.default)
+		net.WriteString(v.cvar_obj:GetString())
+		net.Send(ply)
 	end
 end
-hook.Add( ULib.HOOK_LOCALPLAYERREADY, "ULibSendCvars", repCvarOnJoin )
+hook.Add(ULib.HOOK_LOCALPLAYERREADY, "ULibSendCvars", repCvarOnJoin)
 
 
-local function clientChangeCvar( ply, command, argv )
-	local sv_cvar = argv[ 1 ]
-	local newvalue = argv[ 2 ]
+local function clientChangeCvar(ply, command, argv)
+	local sv_cvar = argv[1]
+	local newvalue = argv[2]
 
-	if not sv_cvar or not newvalue or not repcvars[ sv_cvar:lower() ] then -- Bad value, ignore
+	if not sv_cvar or not newvalue or not repcvars[sv_cvar:lower()] then -- Bad value, ignore
 		return
 	end
 
 	sv_cvar = sv_cvar:lower()
-	cvar_obj = repcvars[ sv_cvar ].cvar_obj
+	cvar_obj = repcvars[sv_cvar].cvar_obj
 	local oldvalue = cvar_obj:GetString()
 	if oldvalue == newvalue then return end -- Agreement
 
-	local access = repcvars[ sv_cvar ].access
-	if not ply:query( access ) then
-		ULib.tsayError( ply, "You do not have access to this cvar (" .. sv_cvar .. "), " .. ply:Nick() .. "." )
-		net.Start( "ulib_repChangeCvar" )
-			net.WriteEntity( ply )
-			net.WriteString( repcvars[ sv_cvar ].cl_cvar )
-			net.WriteString( oldvalue )
-			net.WriteString( oldvalue ) -- No change
-		net.Send( ply )
+	local access = repcvars[sv_cvar].access
+	if not ply:query(access) then
+		ULib.tsayError(ply, "You do not have access to this cvar (" .. sv_cvar .. "), " .. ply:Nick() .. ".")
+		net.Start("ulib_repChangeCvar")
+		net.WriteEntity(ply)
+		net.WriteString(repcvars[sv_cvar].cl_cvar)
+		net.WriteString(oldvalue)
+		net.WriteString(oldvalue) -- No change
+		net.Send(ply)
 		return
 	end
 
-	repcvars[ sv_cvar ].ignore = ply -- Flag other hook not to go off. Flag will be removed at hook.
-	RunConsoleCommand( sv_cvar, newvalue )
-	hook.Call( ULib.HOOK_REPCVARCHANGED, _, sv_cvar, repcvars[ sv_cvar ].cl_cvar, ply, oldvalue, newvalue )
+	repcvars[sv_cvar].ignore = ply -- Flag other hook not to go off. Flag will be removed at hook.
+	RunConsoleCommand(sv_cvar, newvalue)
+	hook.Call(ULib.HOOK_REPCVARCHANGED, _, sv_cvar, repcvars[sv_cvar].cl_cvar, ply, oldvalue, newvalue)
 end
-concommand.Add( "ulib_update_cvar", clientChangeCvar, nil, nil, FCVAR_SERVER_CAN_EXECUTE )
+concommand.Add("ulib_update_cvar", clientChangeCvar, nil, nil, FCVAR_SERVER_CAN_EXECUTE)
 -- Adding FCVAR_SERVER_CAN_EXECUTE above prevents an odd bug where if a user hosts a listen server, this command gets registered,
 -- but when they join another server they can't change any replicated cvars.
 
-repCvarServerChanged = function( sv_cvar, oldvalue, newvalue )
-	if not repcvars[ sv_cvar ] then -- Bad value or we need to ignore it
+repCvarServerChanged = function(sv_cvar, oldvalue, newvalue)
+	if not repcvars[sv_cvar] then -- Bad value or we need to ignore it
 		return
 	end
-	
-	net.Start( "ulib_repChangeCvar" ) -- Tell clients to reset to new value
-		net.WriteEntity( repcvars[ sv_cvar ].ignore or Entity( 0 ) )
-		net.WriteString( repcvars[ sv_cvar ].cl_cvar )
-		net.WriteString( oldvalue )
-		net.WriteString( newvalue )
+
+	net.Start("ulib_repChangeCvar") -- Tell clients to reset to new value
+	net.WriteEntity(repcvars[sv_cvar].ignore or Entity(0))
+	net.WriteString(repcvars[sv_cvar].cl_cvar)
+	net.WriteString(oldvalue)
+	net.WriteString(newvalue)
 	net.Broadcast()
 
-	if repcvars[ sv_cvar ].ignore then
-		repcvars[ sv_cvar ].ignore = nil
+	if repcvars[sv_cvar].ignore then
+		repcvars[sv_cvar].ignore = nil
 	else
-		hook.Call( ULib.HOOK_REPCVARCHANGED, _, sv_cvar, repcvars[ sv_cvar ].cl_cvar, Entity( 0 ), oldvalue, newvalue )
+		hook.Call(ULib.HOOK_REPCVARCHANGED, _, sv_cvar, repcvars[sv_cvar].cl_cvar, Entity(0), oldvalue, newvalue)
 	end
 end

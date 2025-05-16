@@ -15,7 +15,7 @@
 		direction - The direction to apply the acceleration in ( if the magnitude is part of the direction, specify nil for the magnitude )
 		dTime - *(Optional, defaults to 1)* The time passed since the last update in seconds ( IE: 0.5 for dTime would only apply half the acceleration )
 ]]
-function ULib.applyAccel( ent, magnitude, direction, dTime )
+function ULib.applyAccel(ent, magnitude, direction, dTime)
 	if dTime == nil then dTime = 1 end
 
 	if magnitude ~= nil then
@@ -32,12 +32,11 @@ function ULib.applyAccel( ent, magnitude, direction, dTime )
 	if ent:GetMoveType() == MOVETYPE_VPHYSICS then
 		-- a = f/m , so times by mass to get the force.
 		local force = accel * ent:GetPhysicsObject():GetMass()
-		ent:GetPhysicsObject():ApplyForceCenter( force )
+		ent:GetPhysicsObject():ApplyForceCenter(force)
 	else
-		ent:SetVelocity( accel ) -- As it turns out, SetVelocity() is actually SetAccel() in GM10
+		ent:SetVelocity(accel) -- As it turns out, SetVelocity() is actually SetAccel() in GM10
 	end
 end
-
 
 --[[
 	Function: applyForce
@@ -49,7 +48,7 @@ end
 		direction - The direction to apply the force in ( if the magnitude is part of the direction, specify nil for the magnitude )
 		dTime - *(Optional, defaults to 1)* The time passed since the last update in seconds ( IE: 0.5 for dTime would only apply half the force )
 ]]
-function ULib.applyForce( ent, magnitude, direction, dTime )
+function ULib.applyForce(ent, magnitude, direction, dTime)
 	if dTime == nil then dTime = 1 end
 
 	if magnitude ~= nil then
@@ -64,20 +63,20 @@ function ULib.applyForce( ent, magnitude, direction, dTime )
 	force = direction * force
 
 	if ent:GetMoveType() == MOVETYPE_VPHYSICS then
-		ent:GetPhysicsObject():ApplyForceCenter( force )
+		ent:GetPhysicsObject():ApplyForceCenter(force)
 	else
 		-- Because we're not dealing with objects that have vphysics, they might not have a mass. This would cause errors, let's catch them here.
 		local mass = ent:GetPhysicsObject():GetMass()
 		if not mass then
 			mass = 1
-			Msg( "applyForce was called with a non-physics entity that doesn't have a mass. To continue calculations, we're assuming it has a mass of one. This could very well produce unrealistic looking physics!\n")
+			Msg(
+			"applyForce was called with a non-physics entity that doesn't have a mass. To continue calculations, we're assuming it has a mass of one. This could very well produce unrealistic looking physics!\n")
 		end
 		-- f = m*a, so divide it by mass to get the accel
-		local accel = force * 1/mass
-		ent:SetVelocity( accel ) -- As it turns out, SetVelocity() is actually SetAccel() in GM10
+		local accel = force * 1 / mass
+		ent:SetVelocity(accel) -- As it turns out, SetVelocity() is actually SetAccel() in GM10
 	end
 end
-
 
 --[[
 	Function: applyAccelInCurDirection
@@ -91,11 +90,10 @@ end
 		magnitude - The amount of acceleration
 		dTime - *(Optional, defaults to 1)* The time passed since the last update in seconds ( IE: 0.5 for dTime would only apply half the acceleration )
 ]]
-function ULib.applyAccelInCurDirection( ent, magnitude, dTime )
-	local direction = ent:GetVelocity( entid ):GetNormalized()
-	ULib.applyAccel( entid, magnitude, direction, dTime )
+function ULib.applyAccelInCurDirection(ent, magnitude, dTime)
+	local direction = ent:GetVelocity(entid):GetNormalized()
+	ULib.applyAccel(entid, magnitude, direction, dTime)
 end
-
 
 --[[
 	Function: applyForceInCurDirection
@@ -109,7 +107,7 @@ end
 		magnitude - The amount of force
 		dTime - *(Optional, defaults to 1)* The time passed since the last update in seconds ( IE: 0.5 for dTime would only apply half the force )
 ]]
-function ULib.applyForceInCurDirection( ent, magnitude, dTime )
-	local direction = ent:GetVelocity( entid ):GetNormalized()
-	ULib.applyForce( entid, magnitude, direction, dTime )
+function ULib.applyForceInCurDirection(ent, magnitude, dTime)
+	local direction = ent:GetVelocity(entid):GetNormalized()
+	ULib.applyForce(entid, magnitude, direction, dTime)
 end

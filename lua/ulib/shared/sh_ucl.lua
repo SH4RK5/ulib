@@ -14,8 +14,9 @@ local ucl = ULib.ucl -- Make it easier for us to refer to
 
 -- Setup!
 ucl.groups = ucl.groups or {} -- Stores allows, inheritance, and custom addon info keyed by group name
-ucl.users = ucl.users or {} -- Stores allows, denies, group, and last seen name keyed by user id (steamid, ip, whatever)
-ucl.authed = ucl.authed or {} -- alias to ucl.users subtable for player if they have an entry, otherwise a "guest" entry. Keyed by uniqueid.
+ucl.users = ucl.users or {}   -- Stores allows, denies, group, and last seen name keyed by user id (steamid, ip, whatever)
+ucl.authed = ucl.authed or
+{}                            -- alias to ucl.users subtable for player if they have an entry, otherwise a "guest" entry. Keyed by uniqueid.
 -- End setup
 
 --[[
@@ -38,7 +39,7 @@ ucl.authed = ucl.authed or {} -- alias to ucl.users subtable for player if they 
 	Revisions:
 		v2.40 - Rewrite.
 ]]
-function ucl.query( ply, access, hide )
+function ucl.query(ply, access, hide)
 	if SERVER and (not ply:IsValid() or (not hide and ply:IsListenServerHost())) then return true end -- Grant full access to server host.
 	if access == nil then return true end
 	-- if ply:IsBot() then return false end -- Bots have no access!
@@ -50,29 +51,30 @@ function ucl.query( ply, access, hide )
 		unique_id = "1" -- Fix garry's bug
 	end
 
-	if not ucl.authed[ unique_id ] then return error( "[ULIB] Unauthed player" ) end -- Sanity check
-	local playerInfo = ucl.authed[ unique_id ]
+	if not ucl.authed[unique_id] then return error("[ULIB] Unauthed player") end  -- Sanity check
+	local playerInfo = ucl.authed[unique_id]
 
 	-- First check the player's info
-	if table.HasValue( playerInfo.deny, access ) then return false end -- Deny overrides all else
-	if table.HasValue( playerInfo.allow, access ) then return true end
-	if playerInfo.allow[ access ] then return true, playerInfo.allow[ access ] end -- Access tag
+	if table.HasValue(playerInfo.deny, access) then return false end            -- Deny overrides all else
+	if table.HasValue(playerInfo.allow, access) then return true end
+	if playerInfo.allow[access] then return true, playerInfo.allow[access] end  -- Access tag
 
 	-- Now move onto groups and group inheritance
 	local group = ply:GetUserGroup()
 	while group do -- While group is not nil
-		local groupInfo = ucl.groups[ group ]
-		if not groupInfo then return error( "[ULib] Player " .. ply:Nick() .. " has an invalid group (" .. group .. "), aborting. Please be careful when modifying the ULib files!" ) end
-		if table.HasValue( groupInfo.allow, access ) then return true end
-		if groupInfo.allow[ access ] then return true, groupInfo.allow[ access ] end
+		local groupInfo = ucl.groups[group]
+		if not groupInfo then return error("[ULib] Player " ..
+			ply:Nick() ..
+			" has an invalid group (" .. group .. "), aborting. Please be careful when modifying the ULib files!") end
+		if table.HasValue(groupInfo.allow, access) then return true end
+		if groupInfo.allow[access] then return true, groupInfo.allow[access] end
 
-		group = ucl.groupInheritsFrom( group )
+		group = ucl.groupInheritsFrom(group)
 	end
 
 	-- No specific instruction, assume they don't have access.
 	return nil
 end
-
 
 --[[
 	Function: ucl.groupInheritsFrom
@@ -91,18 +93,17 @@ end
 
 		v2.40 - Initial.
 ]]
-function ucl.groupInheritsFrom( group )
-	if not ucl.groups[ group ] then return false end
+function ucl.groupInheritsFrom(group)
+	if not ucl.groups[group] then return false end
 
 	if group == ULib.ACCESS_ALL then -- Force this to inherit from nil
 		return nil
-	elseif not ucl.groups[ group ].inherit_from or ucl.groups[ group ].inherit_from == "" then
+	elseif not ucl.groups[group].inherit_from or ucl.groups[group].inherit_from == "" then
 		return ULib.ACCESS_ALL
 	else
-		return ucl.groups[ group ].inherit_from
+		return ucl.groups[group].inherit_from
 	end
 end
-
 
 --[[
 	Function: ucl.getInheritanceTree
@@ -131,22 +132,22 @@ end
 		v2.40 - Initial
 ]]
 function ucl.getInheritanceTree()
-	local inherits = { [ULib.ACCESS_ALL]={} }
-	local find = { [ULib.ACCESS_ALL]=inherits[ULib.ACCESS_ALL] }
-	for group, _ in pairs( ucl.groups ) do
+	local inherits = { [ULib.ACCESS_ALL] = {} }
+	local find = { [ULib.ACCESS_ALL] = inherits[ULib.ACCESS_ALL] }
+	for group, _ in pairs(ucl.groups) do
 		if group ~= ULib.ACCESS_ALL then
-			local inherits_from = ucl.groupInheritsFrom( group )
+			local inherits_from = ucl.groupInheritsFrom(group)
 			if not inherits_from then inherits_from = ULib.ACCESS_ALL end
 
-			find[ inherits_from ] = find[ inherits_from ] or {} -- Use index if it exists, otherwise create one for this group
-			find[ group ] = find[ group ] or {} -- If someone's created our index, use it. Otherwise, create one.
-			find[ inherits_from ][ group ] = find[ group ]
+			find[inherits_from] = find[inherits_from] or
+			{}                                         -- Use index if it exists, otherwise create one for this group
+			find[group] = find[group] or {}            -- If someone's created our index, use it. Otherwise, create one.
+			find[inherits_from][group] = find[group]
 		end
 	end
 
 	return inherits
 end
-
 
 --[[
 	Function: ucl.getGroupCanTarget
@@ -165,22 +166,22 @@ end
 
 		v2.40 - Initial.
 ]]
-function ucl.getGroupCanTarget( group )
-	ULib.checkArg( 1, "ULib.ucl.getGroupCanTarget", "string", group )
-	if not ucl.groups[ group ] then return error( "Group does not exist (" .. group .. ")", 2 ) end
+function ucl.getGroupCanTarget(group)
+	ULib.checkArg(1, "ULib.ucl.getGroupCanTarget", "string", group)
+	if not ucl.groups[group] then return error("Group does not exist (" .. group .. ")", 2) end
 
-	return ucl.groups[ group ].can_target
+	return ucl.groups[group].can_target
 end
 
 -- Client init stuff
 if CLIENT then
-	function ucl.initClientUCL( authed, groups )
+	function ucl.initClientUCL(authed, groups)
 		ucl.authed = authed
 		ucl.groups = groups
-		for name, data in pairs( groups ) do
-			if not ULib.findInTable( {"superadmin", "admin", "user"}, name ) then
+		for name, data in pairs(groups) do
+			if not ULib.findInTable({ "superadmin", "admin", "user" }, name) then
 				inherit_from = data.inherit_from or "user"
-				CAMI.RegisterUsergroup( {Name=name, Inherits=inherit_from}, CAMI.ULX_TOKEN )
+				CAMI.RegisterUsergroup({ Name = name, Inherits = inherit_from }, CAMI.ULX_TOKEN)
 			end
 		end
 	end
@@ -189,7 +190,7 @@ end
 ------------------
 --//Meta hooks//--
 ------------------
-local meta = FindMetaTable( "Player" )
+local meta = FindMetaTable("Player")
 if not meta then return end
 
 
@@ -198,10 +199,9 @@ if not meta then return end
 
 	This is an alias of ULib.ucl.query()
 ]]
-function meta:query( access, hide )
-	return ULib.ucl.query( self, access, hide )
+function meta:query(access, hide)
+	return ULib.ucl.query(self, access, hide)
 end
-
 
 local origIsAdmin = meta.IsAdmin
 --[[
@@ -220,13 +220,12 @@ local origIsAdmin = meta.IsAdmin
 		v2.40 - Rewrite.
 ]]
 function meta:IsAdmin()
-	if ucl.groups[ ULib.ACCESS_ADMIN ] then
-		return self:CheckGroup( ULib.ACCESS_ADMIN )
+	if ucl.groups[ULib.ACCESS_ADMIN] then
+		return self:CheckGroup(ULib.ACCESS_ADMIN)
 	else -- Group doesn't exist, fall back on garry's method
-		return origIsAdmin( self )
+		return origIsAdmin(self)
 	end
 end
-
 
 local origIsSuperAdmin = meta.IsSuperAdmin
 --[[
@@ -245,13 +244,12 @@ local origIsSuperAdmin = meta.IsSuperAdmin
 		v2.40 - Rewrite.
 ]]
 function meta:IsSuperAdmin()
-	if ucl.groups[ ULib.ACCESS_SUPERADMIN ] then
-		return self:CheckGroup( ULib.ACCESS_SUPERADMIN )
+	if ucl.groups[ULib.ACCESS_SUPERADMIN] then
+		return self:CheckGroup(ULib.ACCESS_SUPERADMIN)
 	else -- Group doesn't exist, fall back on garry's method
-		return origIsSuperAdmin( self )
+		return origIsSuperAdmin(self)
 	end
 end
-
 
 --[[
 	Function: Player:GetUserGroup
@@ -273,10 +271,9 @@ function meta:GetUserGroup()
 	if CLIENT and game.SinglePlayer() then
 		uid = "1" -- Fix garry's bug
 	end
-	if not ucl.authed[ uid ] then return "" end
-	return ucl.authed[ uid ].group or "user"
+	if not ucl.authed[uid] then return "" end
+	return ucl.authed[uid].group or "user"
 end
-
 
 --[[
 	Function: Player:CheckGroup
@@ -297,12 +294,12 @@ end
 
 		v2.40 - Initial.
 ]]
-function meta:CheckGroup( group_check )
-	if not ucl.groups[ group_check ] then return false end
+function meta:CheckGroup(group_check)
+	if not ucl.groups[group_check] then return false end
 	local group = self:GetUserGroup()
 	while group do
 		if group == group_check then return true end
-		group = ucl.groupInheritsFrom( group )
+		group = ucl.groupInheritsFrom(group)
 	end
 
 	return false

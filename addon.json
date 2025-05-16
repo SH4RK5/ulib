@@ -1,9 +1,11 @@
 {
-	"title"		:	"ULib",
-	"type"		:	"ServerContent",
-	"tags"		:	[ "fun", "build" ],
-	"ignore"	:
-	[
+	"title": "ULib",
+	"type": "ServerContent",
+	"tags": [
+		"fun",
+		"build"
+	],
+	"ignore": [
 		"addon.txt",
 		".editorconfig",
 		".git*",
